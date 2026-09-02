@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 import { Button, Input } from '../../components/common';
 import { useAuth } from '../../context/useAuth';
@@ -11,8 +11,17 @@ const ROLE_REDIRECT = {
   student: '/student/dashboard',
 };
 
+const SAFE_REDIRECT = ['/search', '/about', '/'];
+const isSafeRedirect = (path) => {
+  if (!path) return false;
+  if (SAFE_REDIRECT.includes(path)) return true;
+  return /^\/books\/\d+/.test(path);
+};
+
 const Login = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect') || '';
   const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
@@ -60,7 +69,11 @@ const Login = () => {
       const result = login(formData.email, formData.password);
       setLoading(false);
       if (result.success) {
-        navigate(ROLE_REDIRECT[result.user.role]);
+        if (redirect && isSafeRedirect(redirect)) {
+          navigate(redirect);
+        } else {
+          navigate(ROLE_REDIRECT[result.user.role]);
+        }
       } else {
         setErrors({ general: result.error });
       }

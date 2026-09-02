@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, BookOpen, Book, Laptop, Stethoscope, Scale, Calculator, GraduationCap } from 'lucide-react';
+import { Search, Book, Laptop, Stethoscope, Scale, Calculator, GraduationCap } from 'lucide-react';
 import { useBooks } from '../../context/useBook';
+import { BookCover } from '../../components/common';
 import './Public.css';
 
 const HOME_CATEGORIES = [
@@ -75,9 +76,7 @@ const Home = () => {
         <div className="books-grid">
           {featuredBooks.map((book) => (
             <Link to={`/books/${book.id}`} key={book.id} className="book-card">
-              <div className="book-cover">
-                <BookOpen size={48} />
-              </div>
+              <BookCover book={book} />
               <div className="book-info">
                 <h3>{book.title}</h3>
                 <p>{book.author}</p>

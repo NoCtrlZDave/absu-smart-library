@@ -1,14 +1,25 @@
-import { useParams, Link } from 'react-router-dom';
-import { BookOpen, MapPin, Calendar, Hash, Building, Tag, ArrowLeft, Bookmark } from 'lucide-react';
-import { Button, Badge } from '../../components/common';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { MapPin, Calendar, Hash, Building, Tag, ArrowLeft, Bookmark, BookOpen } from 'lucide-react';
+import { Button, Badge, BookCover } from '../../components/common';
 import { makeLocationString } from '../../data/books';
 import { useBooks } from '../../context/useBook';
+import { useAuth } from '../../context/useAuth';
 import './Public.css';
 
 const BookDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { getBook } = useBooks();
+  const { user } = useAuth();
   const book = getBook(id);
+
+  const requireLogin = (nextPath) => {
+    if (user) {
+      navigate(nextPath);
+      return;
+    }
+    navigate(`/login?redirect=${encodeURIComponent(nextPath)}`);
+  };
 
   if (!book) {
     return (
@@ -37,9 +48,7 @@ const BookDetails = () => {
 
       <div className="book-details-content">
         <div>
-          <div className="book-cover-large">
-            <BookOpen size={64} />
-          </div>
+          <BookCover book={book} size="large" />
         </div>
 
         <div className="book-details-info">
@@ -109,15 +118,13 @@ const BookDetails = () => {
           </div>
 
           <div className="book-actions">
-            <Link to={`/books/${book.id}/location`}>
-              <Button variant="outline">
-                <MapPin size={18} />
-                Locate Book
-              </Button>
-            </Link>
-            <Button disabled={!book.available}>
+            <Button variant="outline" onClick={() => requireLogin(`/books/${book.id}/location`)}>
+              <MapPin size={18} />
+              Locate Book
+            </Button>
+            <Button disabled={!book.available} onClick={() => user ? alert('Reservation feature coming soon.') : requireLogin(`/books/${book.id}`)}>
               <Bookmark size={18} />
-              Reserve
+              {user ? 'Reserve' : 'Reserve (Login to continue)'}
             </Button>
           </div>
         </div>

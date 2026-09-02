@@ -1,13 +1,27 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { ArrowLeft, Building2, Layers, Grid3X3, BookOpen } from 'lucide-react';
-import { Button } from '../../components/common';
+import { Button, BookCover } from '../../components/common';
 import { useBooks } from '../../context/useBook';
+import { useAuth } from '../../context/useAuth';
 import './Public.css';
 
 const BookLocation = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { getBook } = useBooks();
   const book = getBook(id);
+
+  useEffect(() => {
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(`/books/${id}/location`)}`, { replace: true });
+    }
+  }, [user, id, navigate]);
+
+  if (!user) {
+    return null;
+  }
 
   if (!book) {
     return (
@@ -40,10 +54,15 @@ const BookLocation = () => {
 
       <div className="location-card">
         <div className="location-header">
-          <h1>Book Location</h1>
-          <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-            {book.title}
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <BookCover book={book} size="small" />
+            <div>
+              <h1>Book Location</h1>
+              <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+                {book.title}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="location-path">

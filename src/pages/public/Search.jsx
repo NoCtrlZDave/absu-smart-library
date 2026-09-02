@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search as SearchIcon, Filter, BookOpen, SlidersHorizontal } from 'lucide-react';
-import { Button, Input, Pagination } from '../../components/common';
+import { Button, Input, Pagination, BookCover } from '../../components/common';
 import { CATEGORIES } from '../../data/books';
 import { useBooks } from '../../context/useBook';
 import './Public.css';
@@ -159,9 +159,7 @@ const Search = () => {
               <div className="results-grid">
                 {currentBooks.map(book => (
                   <Link to={`/books/${book.id}`} key={book.id} className="book-card">
-                    <div className="book-cover">
-                      <BookOpen size={48} />
-                    </div>
+                    <BookCover book={book} />
                     <div className="book-info">
                       <h3>{book.title}</h3>
                       <p>{book.author}</p>
