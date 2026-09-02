@@ -1,55 +1,39 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Building2, Layers, Grid3X3, BookOpen, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Building2, Layers, Grid3X3, BookOpen } from 'lucide-react';
 import { Button } from '../../components/common';
+import { useBooks } from '../../context/useBook';
 import './Public.css';
-
-const locationData = {
-  1: {
-    bookId: 1,
-    title: 'Introduction to Algorithms',
-    library: 'Main Library',
-    floor: 'Floor 3',
-    floorNumber: 3,
-    section: 'Section A',
-    sectionName: 'Computer Science',
-    rack: 'Rack 2',
-    shelf: 'Shelf 4',
-    description: 'This book is located in the Computer Science section on the 3rd floor of the Main Library.'
-  },
-  2: {
-    bookId: 2,
-    title: 'Engineering Mathematics',
-    library: 'Main Library',
-    floor: 'Floor 2',
-    floorNumber: 2,
-    section: 'Section B',
-    sectionName: 'Engineering',
-    rack: 'Rack 1',
-    shelf: 'Shelf 3',
-    description: 'This book is located in the Engineering section on the 2nd floor of the Main Library.'
-  }
-};
-
-const defaultLocation = {
-  bookId: 0,
-  title: 'Sample Book',
-  library: 'Main Library',
-  floor: 'Floor 1',
-  floorNumber: 1,
-  section: 'Section A',
-  sectionName: 'General',
-  rack: 'Rack 1',
-  shelf: 'Shelf 1',
-  description: 'This is a sample location for demonstration purposes.'
-};
 
 const BookLocation = () => {
   const { id } = useParams();
-  const location = locationData[id] || { ...defaultLocation, bookId: parseInt(id) };
+  const { getBook } = useBooks();
+  const book = getBook(id);
+
+  if (!book) {
+    return (
+      <div className="book-location" style={{ textAlign: 'center', padding: '4rem' }}>
+        <BookOpen size={64} style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }} />
+        <h1 style={{ marginBottom: '0.5rem' }}>Book Not Found</h1>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+          We could not find the location of this book.
+        </p>
+        <Link to="/search">
+          <Button>
+            <ArrowLeft size={18} />
+            Back to Search
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
+  const { library = 'Main Library', floor = 'Floor 1', section = 'Section A', rack = 'Rack 1', shelf = 'Shelf 1' } = book.location || {};
+  const description = book.location?.description ||
+    `This book is located in the ${book.category} section on ${floor} of the ${library}.`;
 
   return (
     <div className="book-location">
-      <Link to={`/book/${id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', marginBottom: '1.5rem', textDecoration: 'none', fontWeight: 500 }}>
+      <Link to={`/books/${id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', marginBottom: '1.5rem', textDecoration: 'none', fontWeight: 500 }}>
         <ArrowLeft size={18} />
         Back to Book Details
       </Link>
@@ -58,7 +42,7 @@ const BookLocation = () => {
         <div className="location-header">
           <h1>Book Location</h1>
           <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-            {location.title}
+            {book.title}
           </p>
         </div>
 
@@ -68,57 +52,47 @@ const BookLocation = () => {
               <Building2 size={24} />
             </div>
             <span className="location-node-label">Library</span>
-            <span className="location-node-value">{location.library}</span>
+            <span className="location-node-value">{library}</span>
           </div>
-
-          <span className="location-connector">
-            <ArrowRight size={24} />
-          </span>
 
           <div className="location-node">
             <div className="location-node-icon">
               <Layers size={24} />
             </div>
             <span className="location-node-label">Floor</span>
-            <span className="location-node-value">{location.floor}</span>
+            <span className="location-node-value">{floor}</span>
           </div>
-
-          <span className="location-connector">
-            <ArrowRight size={24} />
-          </span>
 
           <div className="location-node">
             <div className="location-node-icon">
               <Grid3X3 size={24} />
             </div>
             <span className="location-node-label">Section</span>
-            <span className="location-node-value">{location.section}</span>
+            <span className="location-node-value">{section}</span>
           </div>
-
-          <span className="location-connector">
-            <ArrowRight size={24} />
-          </span>
 
           <div className="location-node active">
             <div className="location-node-icon">
               <BookOpen size={24} />
             </div>
             <span className="location-node-label">Rack - Shelf</span>
-            <span className="location-node-value">{location.rack}, {location.shelf}</span>
+            <span className="location-node-value">{rack}, {shelf}</span>
           </div>
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', background: 'var(--background)', borderRadius: '12px' }}>
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginBottom: '1rem' }}>
-            {location.description}
+            {description}
           </p>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-            Section: {location.sectionName} | {location.floor} → {location.section} → {location.rack} → {location.shelf}
+            {book.available
+              ? `${book.availableCopies} of ${book.totalCopies} copies are available here`
+              : 'All copies are currently borrowed or reserved'}
           </p>
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-          <Link to={`/book/${id}`}>
+          <Link to={`/books/${id}`}>
             <Button>
               <ArrowLeft size={18} />
               Return to Book Details

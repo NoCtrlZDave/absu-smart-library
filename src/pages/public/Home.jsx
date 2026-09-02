@@ -1,29 +1,27 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, BookOpen, Book, Laptop, Stethoscope, Scale, Calculator, GraduationCap } from 'lucide-react';
+import { useBooks } from '../../context/useBook';
 import './Public.css';
 
-const categories = [
-  { name: 'Engineering', icon: <Calculator size={24} />, count: 245 },
-  { name: 'Computer Science', icon: <Laptop size={24} />, count: 189 },
-  { name: 'Medicine', icon: <Stethoscope size={24} />, count: 156 },
-  { name: 'Law', icon: <Scale size={24} />, count: 134 },
-  { name: 'Business', icon: <Book size={24} />, count: 178 },
-  { name: 'Education', icon: <GraduationCap size={24} />, count: 112 }
-];
-
-const featuredBooks = [
-  { id: 1, title: 'Introduction to Algorithms', author: 'Thomas H. Cormen', year: 2022, available: true },
-  { id: 2, title: 'Engineering Mathematics', author: 'K.A. Stroud', year: 2021, available: true },
-  { id: 3, title: 'Principles of Anatomy', author: 'G.J. Tortora', year: 2023, available: false },
-  { id: 4, title: 'Constitutional Law', author: 'Ernest L. Phillips', year: 2020, available: true },
-  { id: 5, title: 'Organic Chemistry', author: 'Paula Yurkanis Bruice', year: 2022, available: true },
-  { id: 6, title: 'Database System Concepts', author: 'Abraham Silberschatz', year: 2023, available: true }
+const HOME_CATEGORIES = [
+  { name: 'Engineering', icon: <Calculator size={24} /> },
+  { name: 'Computer Science', icon: <Laptop size={24} /> },
+  { name: 'Medicine', icon: <Stethoscope size={24} /> },
+  { name: 'Law', icon: <Scale size={24} /> },
+  { name: 'Business', icon: <Book size={24} /> },
+  { name: 'Education', icon: <GraduationCap size={24} /> }
 ];
 
 const Home = () => {
+  const { books, categories } = useBooks();
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+
+  const categoryCount = (name) =>
+    categories.find((c) => c.name === name)?.count || 0;
+
+  const featuredBooks = books.slice(0, 6);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -59,11 +57,11 @@ const Home = () => {
           <p>Explore our extensive collection across various disciplines</p>
         </div>
         <div className="categories-grid">
-          {categories.map((category, index) => (
+          {HOME_CATEGORIES.map((category, index) => (
             <Link to={`/search?category=${category.name}`} key={index} className="category-card">
               <div className="category-icon">{category.icon}</div>
               <h3>{category.name}</h3>
-              <p>{category.count} books</p>
+              <p>{categoryCount(category.name)} books</p>
             </Link>
           ))}
         </div>
@@ -76,7 +74,7 @@ const Home = () => {
         </div>
         <div className="books-grid">
           {featuredBooks.map((book) => (
-            <Link to={`/book/${book.id}`} key={book.id} className="book-card">
+            <Link to={`/books/${book.id}`} key={book.id} className="book-card">
               <div className="book-cover">
                 <BookOpen size={48} />
               </div>

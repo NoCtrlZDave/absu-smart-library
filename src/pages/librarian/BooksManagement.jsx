@@ -2,31 +2,26 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Plus, Pencil, Trash2, BookOpen, Copy } from 'lucide-react';
 import { Button, Input, Select, Modal } from '../../components/common';
+import { useBooks } from '../../context/useBook';
 import './Librarian.css';
 
-const initialBooks = [
-  { id: 1, title: 'Introduction to Algorithms', category: 'Computer Science', copies: 5, available: 3, status: 'available' },
-  { id: 2, title: 'Engineering Mathematics', category: 'Engineering', copies: 4, available: 2, status: 'available' },
-  { id: 3, title: 'Principles of Anatomy', category: 'Medicine', copies: 3, available: 0, status: 'borrowed' },
-  { id: 4, title: 'Constitutional Law', category: 'Law', copies: 6, available: 4, status: 'available' },
-  { id: 5, title: 'Organic Chemistry', category: 'Chemistry', copies: 4, available: 1, status: 'available' }
-];
-
 const BooksManagement = () => {
-  const [books, setBooks] = useState(initialBooks);
+  const { books, deleteBook, categories } = useBooks();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [bookToDelete, setBookToDelete] = useState(null);
 
-  const categories = ['All', 'Computer Science', 'Engineering', 'Medicine', 'Law', 'Chemistry'];
+  const statusOf = (book) => (book.availableCopies > 0 ? 'available' : 'borrowed');
+
+  const categoryOptions = ['All', ...categories.map((c) => c.name)];
 
   const filteredBooks = books.filter(book => {
-    const matchesSearch = search === '' || 
+    const matchesSearch = search === '' ||
       book.title.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = categoryFilter === 'All' || book.category === categoryFilter;
-    const matchesStatus = statusFilter === 'All' || book.status === statusFilter;
+    const matchesStatus = statusFilter === 'All' || statusOf(book) === statusFilter;
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
@@ -36,7 +31,7 @@ const BooksManagement = () => {
   };
 
   const handleConfirmDelete = () => {
-    setBooks(prev => prev.filter(b => b.id !== bookToDelete.id));
+    deleteBook(bookToDelete.id);
     setShowDeleteModal(false);
     setBookToDelete(null);
   };
@@ -57,7 +52,7 @@ const BooksManagement = () => {
             icon={Search}
           />
           <Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
-            {categories.map(cat => (
+            {categoryOptions.map(cat => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </Select>
@@ -91,43 +86,48 @@ const BooksManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredBooks.map(book => (
-                <tr key={book.id}>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <div className="book-cover-thumb">
-                        <BookOpen size={16} />
+              {filteredBooks.map(book => {
+                const copies = book.totalCopies;
+                const available = book.availableCopies;
+                const status = statusOf(book);
+                return (
+                  <tr key={book.id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div className="book-cover-thumb">
+                          <BookOpen size={16} />
+                        </div>
+                        <strong>{book.title}</strong>
                       </div>
-                      <strong>{book.title}</strong>
-                    </div>
-                  </td>
-                  <td>{book.category}</td>
-                  <td>{book.copies}</td>
-                  <td>{book.available}</td>
-                  <td>
-                    <span className={`badge ${book.status === 'available' ? 'badge-success' : 'badge-danger'}`}>
-                      {book.status === 'available' ? 'Available' : 'Borrowed'}
-                    </span>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <Link to={`/librarian/books/${book.id}/copies`} title="Manage Copies">
-                        <button className="action-btn">
-                          <Copy size={16} />
+                    </td>
+                    <td>{book.category}</td>
+                    <td>{copies}</td>
+                    <td>{available}</td>
+                    <td>
+                      <span className={`badge ${status === 'available' ? 'badge-success' : 'badge-danger'}`}>
+                        {status === 'available' ? 'Available' : 'Borrowed'}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <Link to={`/librarian/books/${book.id}/copies`} title="Manage Copies">
+                          <button className="action-btn">
+                            <Copy size={16} />
+                          </button>
+                        </Link>
+                        <Link to={`/librarian/books/${book.id}/edit`} title="Edit">
+                          <button className="action-btn">
+                            <Pencil size={16} />
+                          </button>
+                        </Link>
+                        <button className="action-btn danger" onClick={() => handleDeleteClick(book)} title="Delete">
+                          <Trash2 size={16} />
                         </button>
-                      </Link>
-                      <Link to={`/librarian/books/${book.id}/edit`} title="Edit">
-                        <button className="action-btn">
-                          <Pencil size={16} />
-                        </button>
-                      </Link>
-                      <button className="action-btn danger" onClick={() => handleDeleteClick(book)} title="Delete">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

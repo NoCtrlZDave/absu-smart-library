@@ -2,26 +2,12 @@ import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search as SearchIcon, Filter, BookOpen, SlidersHorizontal } from 'lucide-react';
 import { Button, Input, Pagination } from '../../components/common';
+import { CATEGORIES } from '../../data/books';
+import { useBooks } from '../../context/useBook';
 import './Public.css';
 
-const allBooks = [
-  { id: 1, title: 'Introduction to Algorithms', author: 'Thomas H. Cormen', category: 'Computer Science', year: 2022, available: true, isbn: '978-0262033848' },
-  { id: 2, title: 'Engineering Mathematics', author: 'K.A. Stroud', category: 'Engineering', year: 2021, available: true, isbn: '978-1352003215' },
-  { id: 3, title: 'Principles of Anatomy', author: 'G.J. Tortora', category: 'Medicine', year: 2023, available: false, isbn: '978-1119634041' },
-  { id: 4, title: 'Constitutional Law', author: 'Ernest L. Phillips', category: 'Law', year: 2020, available: true, isbn: '978-0709989806' },
-  { id: 5, title: 'Organic Chemistry', author: 'Paula Yurkanis Bruice', category: 'Chemistry', year: 2022, available: true, isbn: '978-0134048147' },
-  { id: 6, title: 'Database System Concepts', author: 'Abraham Silberschatz', category: 'Computer Science', year: 2023, available: true, isbn: '978-0078022159' },
-  { id: 7, title: 'Business Ethics', author: 'O.C. Ferrell', category: 'Business', year: 2021, available: false, isbn: '978-1305969469' },
-  { id: 8, title: 'Physics for Scientists', author: 'Raymond A. Serway', category: 'Physics', year: 2022, available: true, isbn: '978-1133947271' },
-  { id: 9, title: 'Fundamentals of Nursing', author: 'Barbara Kozier', category: 'Medicine', year: 2023, available: true, isbn: '978-0134404615' },
-  { id: 10, title: 'Software Engineering', author: 'Ian Sommerville', category: 'Computer Science', year: 2022, available: true, isbn: '978-0133943030' },
-  { id: 11, title: 'Civil Engineering Materials', author: 'S.P. Timoshenko', category: 'Engineering', year: 2020, available: true, isbn: '978-0672307201' },
-  { id: 12, title: 'Educational Psychology', author: 'John W. Santrock', category: 'Education', year: 2023, available: false, isbn: '978-1260405491' }
-];
-
-const categories = ['All Categories', 'Computer Science', 'Engineering', 'Medicine', 'Law', 'Business', 'Education', 'Physics', 'Chemistry'];
-
 const Search = () => {
+  const { books: allBooks } = useBooks();
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All Categories');
@@ -31,13 +17,16 @@ const Search = () => {
   const [showFilters, setShowFilters] = useState(false);
   const booksPerPage = 8;
 
+  const categories = ['All Categories', ...CATEGORIES];
+
   const filteredBooks = allBooks.filter(book => {
-    const matchesQuery = query === '' || 
+    const matchesQuery = query === '' ||
       book.title.toLowerCase().includes(query.toLowerCase()) ||
       book.author.toLowerCase().includes(query.toLowerCase()) ||
-      book.isbn.includes(query);
+      book.isbn.includes(query) ||
+      (book.subjects && book.subjects.some(subject => subject.toLowerCase().includes(query.toLowerCase())));
     const matchesCategory = selectedCategory === 'All Categories' || book.category === selectedCategory;
-    const matchesAvailability = availability === 'all' || 
+    const matchesAvailability = availability === 'all' ||
       (availability === 'available' && book.available) ||
       (availability === 'borrowed' && !book.available);
     const matchesYear = yearRange === 'all' ||
@@ -63,15 +52,15 @@ const Search = () => {
           <form onSubmit={handleSearch} style={{ flex: 1, display: 'flex', gap: '1rem' }}>
             <Input
               type="text"
-              placeholder="Search books by title, author, or ISBN..."
+              placeholder="Search books by title, author, ISBN, or subject..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               icon={SearchIcon}
             />
             <Button type="submit">Search</Button>
           </form>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setShowFilters(!showFilters)}
             className="mobile-filter-btn"
           >
@@ -169,7 +158,7 @@ const Search = () => {
             <>
               <div className="results-grid">
                 {currentBooks.map(book => (
-                  <Link to={`/book/${book.id}`} key={book.id} className="book-card">
+                  <Link to={`/books/${book.id}`} key={book.id} className="book-card">
                     <div className="book-cover">
                       <BookOpen size={48} />
                     </div>

@@ -2,10 +2,15 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, BookOpen, Hash, User, Building2, Calendar, Save, ArrowLeft } from 'lucide-react';
 import { Button, Input, Select } from '../../components/common';
+import { CATEGORIES } from '../../data/books';
+import { useBooks } from '../../context/useBook';
+import { useToast } from '../../components/common/useToast';
 import './Librarian.css';
 
 const AddBook = () => {
   const navigate = useNavigate();
+  const { addBook } = useBooks();
+  const toast = useToast();
   const [formData, setFormData] = useState({
     title: '',
     isbn: '',
@@ -18,11 +23,7 @@ const AddBook = () => {
   const [coverPreview, setCoverPreview] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const categories = [
-    'Computer Science', 'Engineering', 'Medicine', 'Law', 'Business',
-    'Education', 'Physics', 'Chemistry', 'Mathematics', 'Social Sciences',
-    'Arts & Humanities', 'Agriculture'
-  ];
+  const categories = CATEGORIES;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,11 +43,31 @@ const AddBook = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!formData.title.trim()) {
+      toast('Please enter a book title', 'error');
+      return;
+    }
+    if (!formData.category) {
+      toast('Please select a category', 'error');
+      return;
+    }
     setSaving(true);
     setTimeout(() => {
+      const record = addBook({
+        ...formData,
+        location: {
+          library: 'Main Library',
+          floor: 'Floor 1',
+          section: 'Section A',
+          rack: 'Rack 1',
+          shelf: 'Shelf 1'
+        },
+        subjects: formData.title.toLowerCase().split(/\s+/).slice(0, 5)
+      });
       setSaving(false);
+      toast(`"${record.title}" added to the catalogue`, 'success');
       navigate('/librarian/books');
-    }, 1000);
+    }, 600);
   };
 
   return (
