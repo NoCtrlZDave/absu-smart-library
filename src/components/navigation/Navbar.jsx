@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, Menu, X, User, LogOut, ChevronDown, LayoutDashboard, Settings } from 'lucide-react';
+import { Menu, X, User, LogOut, ChevronDown, LayoutDashboard, Settings } from 'lucide-react';
+import absuLogo from '../../assets/ABSU-logo-mark.png';
 import './Navigation.css';
 
 function Navbar({ user = null, onLogout }) {
@@ -59,7 +60,7 @@ function Navbar({ user = null, onLogout }) {
     <>
       <nav className="navbar">
         <Link to="/" className="navbar__brand">
-          <BookOpen size={28} strokeWidth={2.2} />
+          <img src={absuLogo} alt="ABSU logo" className="navbar__brand-logo" />
           <span className="navbar__brand-text">
             ABSU
             <span className="navbar__brand-sub">Smart Library</span>

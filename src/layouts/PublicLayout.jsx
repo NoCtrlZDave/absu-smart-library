@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
-import { BookOpen } from 'lucide-react';
 import Navbar from '../components/navigation/Navbar';
 import { useAuth } from '../context/useAuth';
+import absuLogo from '../assets/ABSU-logo-mark.png';
 import './Layouts.css';
 
 function PublicLayout() {
@@ -18,7 +18,7 @@ function PublicLayout() {
         <div className="footer__inner">
           <div className="footer__brand">
             <span className="footer__brand-name">
-              <BookOpen size={20} />
+              <img src={absuLogo} alt="ABSU logo" className="footer__brand-logo" />
               ABSU Smart Library
             </span>
             <p className="footer__brand-desc">

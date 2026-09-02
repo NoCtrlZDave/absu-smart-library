@@ -1,6 +1,5 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
-  BookOpen,
   X,
   LayoutDashboard,
   BookCopy,
@@ -25,6 +24,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { useAuth } from '../../context/useAuth';
+import absuLogo from '../../assets/ABSU-logo-mark.png';
 import './Navigation.css';
 
 const studentLinks = [
@@ -182,7 +182,7 @@ function Sidebar({ role = 'librarian', isOpen, onClose, user }) {
         </button>
 
         <Link to="/" className="sidebar__brand">
-          <BookOpen size={24} strokeWidth={2.2} />
+          <img src={absuLogo} alt="ABSU logo" className="sidebar__brand-logo" />
           <span className="sidebar__brand-text">
             ABSU
             <span className="sidebar__brand-sub">Smart Library</span>
