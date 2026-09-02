@@ -802,6 +802,14 @@
     padding: 1rem;
   }
 
+  .modal-footer {
+    flex-wrap: wrap;
+  }
+
+  .modal-footer .btn {
+    flex: 1 1 auto;
+  }
+
   .pagination-btn {
     min-width: 32px;
     height: 32px;

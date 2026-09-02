@@ -479,6 +479,7 @@
    ================================================ */
 @media (max-width: 1024px) {
   .sidebar {
+    width: min(80vw, 260px);
     transform: translateX(-100%);
   }
 
@@ -488,6 +489,12 @@
 
   .sidebar__close {
     display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 84vw;
   }
 }
 

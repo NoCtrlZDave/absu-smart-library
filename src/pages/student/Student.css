@@ -320,4 +320,19 @@
     align-items: flex-start;
     gap: 1rem;
   }
+
+  .table-container .data-table {
+    min-width: 640px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-card {
+    padding: 1rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.6rem;
+  }
 }

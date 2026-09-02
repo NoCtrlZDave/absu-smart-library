@@ -42,3 +42,14 @@
   line-height: 1.4;
   opacity: 0.95;
 }
+
+@media (max-width: 768px) {
+  .book-cover--large {
+    height: 280px;
+    max-width: 100%;
+  }
+
+  .book-cover--medium {
+    height: 180px;
+  }
+}

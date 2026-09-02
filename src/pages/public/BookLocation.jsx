@@ -54,7 +54,7 @@ const BookLocation = () => {
 
       <div className="location-card">
         <div className="location-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div className="location-header__book">
             <BookCover book={book} size="small" />
             <div>
               <h1>Book Location</h1>

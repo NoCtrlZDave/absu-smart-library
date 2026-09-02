@@ -277,4 +277,19 @@
   .layout-admin__header-role {
     display: none;
   }
+
+  .layout-admin__title {
+    font-size: 1rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .layout-admin__header-left {
+    min-width: 0;
+  }
+
+  .layout-admin__header-right {
+    flex-shrink: 0;
+  }
 }

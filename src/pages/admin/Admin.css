@@ -406,10 +406,32 @@
     max-width: 100%;
     flex-direction: column;
   }
+
+  .toolbar-right {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .toolbar-right .btn {
+    width: 100%;
+  }
+
+  .table-container .data-table {
+    min-width: 640px;
+  }
 }
 
 @media (max-width: 480px) {
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .content-card {
+    padding: 1rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.6rem;
   }
 }
