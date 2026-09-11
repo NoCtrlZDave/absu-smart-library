@@ -1,0 +1,87 @@
+.activity-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.activity-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.activity-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.activity-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-line {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.activity-action {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.activity-entity {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.activity-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 0.15rem;
+}
+
+.activity-time {
+  font-size: 0.75rem;
+  color: var(--text-muted, #adb5bd);
+  margin-top: 0.15rem;
+}
+
+.activity-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.activity-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  align-self: flex-start;
+}
+
+.activity-more:hover {
+  text-decoration: underline;
+}
