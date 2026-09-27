@@ -9,14 +9,19 @@ const BOOK_COVER_SIZE = {
 };
 
 const BookCover = ({ book, size = 'medium', className = '' }) => {
-  const [errored, setErrored] = useState(false);
-  const isbn = book?.isbn;
+  const [failed, setFailed] = useState(0);
   const sizeTier = BOOK_COVER_SIZE[size] || 'M';
-  const src = isbn
-    ? `https://covers.openlibrary.org/b/isbn/${isbn}-${sizeTier}.jpg?default=false`
-    : null;
+  const sizes = book?.coverImage || book?.isbn;
 
-  if (!src || errored) {
+  const sources = [];
+  if (book?.coverImage) sources.push(book.coverImage);
+  if (book?.isbn) {
+    sources.push(`https://covers.openlibrary.org/b/isbn/${book.isbn}-${sizeTier}.jpg?default=false`);
+  }
+
+  const src = failed < sources.length ? sources[failed] : null;
+
+  if (!src || !sizes) {
     return (
       <div
         className={`book-cover book-cover--fallback ${size && `book-cover--${size}`} ${className}`}
@@ -35,7 +40,7 @@ const BookCover = ({ book, size = 'medium', className = '' }) => {
         src={src}
         alt={`${book?.title} cover`}
         loading="lazy"
-        onError={() => setErrored(true)}
+        onError={() => setFailed((n) => n + 1)}
       />
     </div>
   );

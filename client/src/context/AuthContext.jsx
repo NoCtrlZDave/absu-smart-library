@@ -64,18 +64,6 @@ export const AuthProvider = ({ children }) => {
     [finishLogin]
   );
 
-  const registerStaff = useCallback(
-    async (payload) => {
-      try {
-        const data = await authApi.register(payload);
-        return finishLogin(data);
-      } catch (err) {
-        return { success: false, error: err.message };
-      }
-    },
-    [finishLogin]
-  );
-
   const addUser = useCallback(async (userData) => {
     try {
       const { createUser } = await import('../services/admin');
@@ -108,7 +96,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, addUser, registerStaff, logout, changePassword, loading }}
+      value={{ user, login, addUser, logout, changePassword, loading }}
     >
       {children}
     </AuthContext.Provider>

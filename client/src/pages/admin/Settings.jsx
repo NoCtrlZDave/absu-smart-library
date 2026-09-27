@@ -10,16 +10,12 @@ const Settings = () => {
     language: 'English',
     dateFormat: 'MM/DD/YYYY',
 
-    borrowDuration: 14,
-    maxBooksPerStudent: 5,
-    renewalLimit: 2,
-    overdueFinePerDay: 50,
-    reservationHoldDays: 2,
+    cataloguingStandard: 'RDA',
+    classificationScheme: 'Library of Congress',
+    defaultLocation: 'Main Library, Floor 1',
+
 
     emailNotifications: true,
-    smsNotifications: false,
-    overdueReminders: true,
-    reservationNotifications: true,
     systemAlerts: true
   });
 
@@ -39,7 +35,7 @@ const Settings = () => {
     <div className="admin-page">
       <div className="page-header">
         <h1>System Settings</h1>
-        <p>Configure system-wide preferences and rules.</p>
+        <p>Configure system-wide preferences.</p>
       </div>
 
       <div className="content-card">
@@ -86,52 +82,28 @@ const Settings = () => {
         <div className="settings-group">
           <h3>
             <BookOpen size={18} style={{ color: 'var(--primary)' }} />
-            Borrowing Rules
+            Catalogue & Location
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
             <div className="form-group">
-              <label>Borrow Duration (days)</label>
-              <Input
-                name="borrowDuration"
-                type="number"
-                value={settings.borrowDuration}
-                onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
-              />
+              <label>Cataloguing Standard</label>
+              <Select value={settings.cataloguingStandard} onChange={(e) => handleChange('cataloguingStandard', e.target.value)}>
+                <option value="RDA">RDA</option>
+                <option value="AACR2">AACR2</option>
+              </Select>
             </div>
             <div className="form-group">
-              <label>Max Books Per Student</label>
-              <Input
-                name="maxBooksPerStudent"
-                type="number"
-                value={settings.maxBooksPerStudent}
-                onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
-              />
+              <label>Classification Scheme</label>
+              <Select value={settings.classificationScheme} onChange={(e) => handleChange('classificationScheme', e.target.value)}>
+                <option value="Library of Congress">Library of Congress</option>
+                <option value="Dewey Decimal">Dewey Decimal</option>
+              </Select>
             </div>
             <div className="form-group">
-              <label>Renewal Limit</label>
+              <label>Default Location</label>
               <Input
-                name="renewalLimit"
-                type="number"
-                value={settings.renewalLimit}
-                onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
-              />
-            </div>
-            <div className="form-group">
-              <label>Overdue Fine (₦/day)</label>
-              <Input
-                name="overdueFinePerDay"
-                type="number"
-                value={settings.overdueFinePerDay}
-                onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
-              />
-            </div>
-            <div className="form-group">
-              <label>Reservation Hold (days)</label>
-              <Input
-                name="reservationHoldDays"
-                type="number"
-                value={settings.reservationHoldDays}
-                onChange={(e) => handleChange(e.target.name, parseInt(e.target.value))}
+                value={settings.defaultLocation}
+                onChange={(e) => handleChange('defaultLocation', e.target.value)}
               />
             </div>
           </div>
@@ -150,39 +122,6 @@ const Settings = () => {
             <button
               className={`toggle-switch ${settings.emailNotifications ? 'active' : ''}`}
               onClick={() => handleToggle('emailNotifications')}
-            />
-          </div>
-
-          <div className="settings-item">
-            <div>
-              <div className="settings-item-label">SMS Notifications</div>
-              <div className="settings-item-description">Send notifications via SMS</div>
-            </div>
-            <button
-              className={`toggle-switch ${settings.smsNotifications ? 'active' : ''}`}
-              onClick={() => handleToggle('smsNotifications')}
-            />
-          </div>
-
-          <div className="settings-item">
-            <div>
-              <div className="settings-item-label">Overdue Reminders</div>
-              <div className="settings-item-description">Notify users about overdue books</div>
-            </div>
-            <button
-              className={`toggle-switch ${settings.overdueReminders ? 'active' : ''}`}
-              onClick={() => handleToggle('overdueReminders')}
-            />
-          </div>
-
-          <div className="settings-item">
-            <div>
-              <div className="settings-item-label">Reservation Notifications</div>
-              <div className="settings-item-description">Notify users when reservations are ready</div>
-            </div>
-            <button
-              className={`toggle-switch ${settings.reservationNotifications ? 'active' : ''}`}
-              onClick={() => handleToggle('reservationNotifications')}
             />
           </div>
 

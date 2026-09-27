@@ -3,9 +3,8 @@ import jwt from 'jsonwebtoken';
 import { body, validationResult } from 'express-validator';
 import User from '../models/User.js';
 import { protect } from '../middleware/auth.js';
-import { upload, uploadToCloudinary } from '../middleware/upload.js';
 import asyncHandler from '../utils/asyncHandler.js';
-import { ok, created, badRequest, notFound, unauthorized } from '../utils/responses.js';
+import { ok, badRequest, notFound, unauthorized } from '../utils/responses.js';
 import logActivity from '../utils/audit.js';
 
 const router = express.Router();
@@ -24,78 +23,22 @@ const validate = (req, res, next) => {
 };
 
 router.post(
-  '/register',
-  [
-    body('first_name').notEmpty().withMessage('First name is required'),
-    body('last_name').notEmpty().withMessage('Last name is required'),
-    body('email').isEmail().withMessage('A valid email is required'),
-    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-    body('confirmPassword').custom((value, { req }) => value === req.body.password).withMessage('Passwords do not match'),
-    body('staffType').isIn(['teaching', 'non-teaching']).withMessage('Select whether you are teaching or non-teaching staff'),
-  ],
-  validate,
-  asyncHandler(async (req, res) => {
-    if (req.body.role === 'student') {
-      return badRequest(
-        res,
-        'Student accounts are created by the library administrator. Sign in with your matric number.'
-      );
-    }
-    const { first_name, last_name, email, password, staffType } = req.body;
-    const existing = await User.findOne({ email: email.toLowerCase() });
-    if (existing) return badRequest(res, 'Email already registered');
-
-    const user = await User.create({
-      first_name,
-      last_name,
-      email: email.toLowerCase(),
-      password,
-      role: 'staff',
-      staffType,
-      verificationStatus: 'pending',
-      isActive: true,
-      profileImage: req.body.profileImage || null,
-      identityInfo: req.body.identityInfo ? String(req.body.identityInfo).trim() : null,
-      title: staffType === 'teaching' ? (req.body.title || null) : null,
-      staffNumber: staffType === 'teaching' ? (req.body.staffNumber || null) : null,
-      faculty: req.body.faculty || null,
-      department: req.body.department || null,
-    });
-
-    const token = signToken(user);
-    await logActivity({ actor: user, action: 'STAFF_SIGNUP_REQUESTED', entity: 'User', entityId: user._id });
-    return created(res, { user: user.toSafeJSON(), token }, 'Account created. Pending administrator verification.');
-  })
-);
-
-router.post(
-  '/upload-picture',
-  upload.single('image'),
-  asyncHandler(async (req, res) => {
-    if (!req.file) return badRequest(res, 'No image uploaded');
-    const result = await uploadToCloudinary(req.file.buffer, 'absu-library/profiles');
-    return ok(res, { url: result.secure_url }, 'Picture uploaded');
-  })
-);
-
-router.post(
   '/login',
-  [body('identifier').notEmpty().withMessage('Email or matric number is required'), body('password').notEmpty().withMessage('Password is required')],
+  [body('identifier').notEmpty().withMessage('Email is required'), body('password').notEmpty().withMessage('Password is required')],
   validate,
   asyncHandler(async (req, res) => {
     const { password } = req.body;
-    const identifier = String(req.body.identifier || '').trim();
+    const identifier = String(req.body.identifier || '').trim().toLowerCase();
 
-    const user = identifier.includes('@')
-      ? await User.findOne({ email: identifier.toLowerCase() })
-      : await User.findOne({
-          matric_number: new RegExp(`^${identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i'),
-        });
+    const user = await User.findOne({ email: identifier });
 
     if (!user || !(await user.comparePassword(password))) {
-      return unauthorized(res, 'Invalid email, matric number or password');
+      return unauthorized(res, 'Invalid email or password');
     }
     if (!user.isActive) return unauthorized(res, 'Account is not active or has been rejected');
+    if (user.role !== 'admin' && user.role !== 'librarian') {
+      return unauthorized(res, 'Only administrators and librarians can sign in');
+    }
 
     const token = signToken(user);
     await logActivity({ actor: user, action: 'USER_LOGIN', entity: 'User', entityId: user._id });
@@ -123,20 +66,11 @@ router.post(
     const user = await User.findById(req.user._id);
     if (!user) return notFound(res, 'User not found');
 
-    if (user.mustChangePassword) {
-      const GENERAL_STUDENT_PASSWORD = 'student123';
-      if (currentPassword !== GENERAL_STUDENT_PASSWORD) {
-        return badRequest(res, 'The current password is incorrect. Use the general password you were given (student123) to set your own password.');
-      }
-      if (newPassword === GENERAL_STUDENT_PASSWORD) {
-        return badRequest(res, 'Your new password must be different from the general password (student123).');
-      }
-    } else if (!(await user.comparePassword(currentPassword))) {
+    if (!(await user.comparePassword(currentPassword))) {
       return badRequest(res, 'Current password is incorrect');
     }
 
     user.password = newPassword;
-    user.mustChangePassword = false;
     await user.save();
     await logActivity({ actor: user, action: 'PASSWORD_CHANGED', entity: 'User', entityId: user._id });
     return ok(res, user.toSafeJSON(), 'Password updated');

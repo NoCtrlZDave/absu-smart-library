@@ -1,0 +1,244 @@
+/* Pillar Map Page Styles */
+.pillar-map-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  font-size: 1.75rem;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.page-header p {
+  color: var(--text-secondary);
+}
+
+/* Resolver tool */
+.pillar-map-resolver {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.pillar-map-resolver h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.pillar-map-resolver__form {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.pillar-map-resolver__form input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  background: var(--background);
+  color: var(--text);
+}
+
+.pillar-map-resolver__form input:focus {
+  border-color: var(--primary);
+}
+
+.pillar-map-resolver__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pillar-map-resolver__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pillar-map-resolver__result {
+  margin-top: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--background);
+}
+
+.pillar-map-resolver__result.is-mapped {
+  border-color: var(--success);
+}
+
+.pillar-map-resolver__result.is-unmapped {
+  border-color: var(--danger);
+}
+
+.pillar-map-resolver__call {
+  display: block;
+  font-family: monospace;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.pillar-map-resolver__result p {
+  margin: 0;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.pillar-map-resolver__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.pillar-map-resolver__meta span {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+}
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Pillar grid */
+.pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.pillar-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pillar-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--primary);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.pillar-card__notes {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--warning);
+  background: var(--background);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.pillar-card__empty {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.pillar-card__subjects {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.pillar-card__subjects li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.88rem;
+}
+
+.pillar-card__sign {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.pillar-card__prefix {
+  display: inline-block;
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  white-space: nowrap;
+}
+
+.pillar-card__subject {
+  color: var(--text-secondary);
+}
+
+.pillar-card__subject-note {
+  color: var(--text-secondary);
+  opacity: 0.8;
+  font-size: 0.8rem;
+}
+
+.pillar-card__arrow {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--primary);
+  margin-top: 0.15rem;
+}
+
+.pillar-card__arrow--left {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 768px) {
+  .pillar-map-page {
+    padding: 1rem;
+  }
+
+  .pillar-map-resolver__form {
+    flex-direction: column;
+  }
+}

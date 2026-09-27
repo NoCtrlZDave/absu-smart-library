@@ -5,9 +5,6 @@ import {
   BookCopy,
   Layers,
   BookMarked,
-  RotateCcw,
-  CalendarCheck,
-  CalendarDays,
   ClipboardList,
   AlertTriangle,
   BarChart3,
@@ -15,69 +12,16 @@ import {
   UserCog,
   Settings,
   FileText,
-  Search,
-  History,
-  Bell,
-  UserCircle,
-  UserRound,
-  GraduationCap,
-  UserCheck,
-  ChevronUp,
   Globe,
+  UserRound,
+  ChevronUp,
   LogOut,
+  Map,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { useAuth } from '../../context/useAuth';
 import absuLogo from '../../assets/ABSU-logo-mark.png';
 import './Navigation.css';
-
-const studentLinks = [
-  {
-    section: 'Overview',
-    items: [
-      { to: '/student/dashboard', icon: LayoutDashboard, label: 'Dashboard', end: true },
-    ],
-  },
-  {
-    section: 'Library',
-    items: [
-      { to: '/search', icon: Search, label: 'Search Books' },
-      { to: '/student/borrowed-books', icon: BookMarked, label: 'Borrowed Books' },
-      { to: '/student/reservations', icon: CalendarCheck, label: 'Reservations' },
-      { to: '/student/history', icon: History, label: 'History' },
-    ],
-  },
-  {
-    section: 'Account',
-    items: [
-      { to: '/student/profile', icon: UserCircle, label: 'Profile' },
-      { to: '/student/notifications', icon: Bell, label: 'Notifications' },
-    ],
-  },
-];
-
-const staffLinks = [
-  {
-    section: 'Overview',
-    items: [
-      { to: '/staff/dashboard', icon: LayoutDashboard, label: 'Dashboard', end: true },
-    ],
-  },
-  {
-    section: 'Library',
-    items: [
-      { to: '/search', icon: Search, label: 'Search Books' },
-      { to: '/staff/borrowed-books', icon: BookMarked, label: 'Borrowed Books' },
-      { to: '/staff/reservations', icon: CalendarCheck, label: 'Reservations' },
-      { to: '/staff/history', icon: History, label: 'History' },
-    ],
-  },
-  {
-    section: 'Account',
-    items: [
-      { to: '/staff/profile', icon: UserCircle, label: 'Profile' },
-    ],
-  },
-];
 
 const librarianLinks = [
   {
@@ -92,14 +36,8 @@ const librarianLinks = [
       { to: '/librarian/books', icon: BookMarked, label: 'Books' },
       { to: '/librarian/book-copies', icon: BookCopy, label: 'Book Copies' },
       { to: '/librarian/shelves', icon: Layers, label: 'Shelves' },
-    ],
-  },
-  {
-    section: 'Circulation',
-    items: [
-      { to: '/librarian/borrowings', icon: BookCopy, label: 'Borrowings' },
-      { to: '/librarian/returns', icon: RotateCcw, label: 'Returns' },
-      { to: '/librarian/reservations', icon: CalendarCheck, label: 'Reservations' },
+      { to: '/librarian/photos', icon: ImageIcon, label: 'Library Photos' },
+      { to: '/librarian/pillars', icon: Map, label: 'Pillar Map' },
     ],
   },
   {
@@ -128,9 +66,6 @@ const adminLinks = [
   {
     section: 'Users',
     items: [
-      { to: '/admin/students', icon: GraduationCap, label: 'Students' },
-      { to: '/admin/staff-verification', icon: UserCheck, label: 'Staff Verification' },
-      { to: '/admin/academic-section', icon: CalendarDays, label: 'Academic Section' },
       { to: '/admin/users', icon: Users, label: 'Users' },
       { to: '/admin/librarians', icon: UserCog, label: 'Librarians' },
     ],
@@ -141,6 +76,9 @@ const adminLinks = [
       { to: '/admin/books', icon: BookMarked, label: 'Books' },
       { to: '/admin/book-copies', icon: BookCopy, label: 'Book Copies' },
       { to: '/admin/shelves', icon: Layers, label: 'Shelves' },
+      { to: '/admin/photos', icon: ImageIcon, label: 'Library Photos' },
+      { to: '/admin/pillars', icon: Map, label: 'Pillar Map' },
+      { to: '/admin/library', icon: FileText, label: 'Library Structure' },
     ],
   },
   {
@@ -154,22 +92,18 @@ const adminLinks = [
 ];
 
 const ROLE_LINKS = {
-  student: studentLinks,
-  staff: staffLinks,
   librarian: librarianLinks,
   admin: adminLinks,
 };
 
 const PROFILE_PATH = {
-  student: '/student/profile',
-  staff: '/staff/profile',
   librarian: '/librarian/profile',
   admin: '/admin/profile',
 };
 
 function Sidebar({ role = 'librarian', isOpen, onClose, user }) {
   const sections = ROLE_LINKS[role] || librarianLinks;
-  const profilePath = PROFILE_PATH[role] || '/student/profile';
+  const profilePath = PROFILE_PATH[role] || '/librarian/profile';
   const navigate = useNavigate();
   const { logout } = useAuth();
 
@@ -273,4 +207,3 @@ function Sidebar({ role = 'librarian', isOpen, onClose, user }) {
 }
 
 export default Sidebar;
-

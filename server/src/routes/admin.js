@@ -11,17 +11,19 @@ import logActivity from '../utils/audit.js';
 const router = express.Router();
 router.use(protect, authorize('admin'));
 
+const ALLOWED_ROLES = ['librarian', 'admin'];
+
 // ----------------------- Users -----------------------
 
 router.get('/users', asyncHandler(async (req, res) => {
   const { role, search, status, page = 1, limit = 20 } = req.query;
   const filter = {};
-  if (role && role !== 'all') filter.role = role;
+  if (role && ALLOWED_ROLES.includes(role)) filter.role = role;
   if (status && status !== 'all') filter.isActive = status === 'active';
 
   const searchRegex = search ? new RegExp(String(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') : null;
   if (searchRegex) {
-    filter.$or = [{ first_name: searchRegex }, { last_name: searchRegex }, { email: searchRegex }, { matric_number: searchRegex }];
+    filter.$or = [{ first_name: searchRegex }, { last_name: searchRegex }, { email: searchRegex }];
   }
 
   const users = await User.find(filter)
@@ -48,113 +50,35 @@ router.post(
     if (!req.body.first_name || !req.body.last_name || !req.body.email || !req.body.password) {
       return badRequest(res, 'first_name, last_name, email and password are required');
     }
+    const role = req.body.role || 'librarian';
+    if (!ALLOWED_ROLES.includes(role)) return badRequest(res, `Role must be one of: ${ALLOWED_ROLES.join(', ')}`);
+
     const existing = await User.findOne({ email: req.body.email.toLowerCase() });
     if (existing) return badRequest(res, 'Email already registered');
-    const { first_name, last_name, email, password, role, matric, matric_number, department, level, phone } = req.body;
+    const { first_name, last_name, email, password, phone } = req.body;
     const user = await User.create({
       first_name,
       last_name,
       email: email.toLowerCase(),
       password,
-      role: role || 'student',
-      matric_number: (matric || matric_number || '').trim() || undefined,
-      mustChangePassword: (role || 'student') === 'student',
-      department,
-      level,
-      phone,
+      role,
+      phone: phone || undefined,
+      isActive: true,
     });
     await logActivity({ actor: req.user, action: 'USER_CREATED', entity: 'User', entityId: user._id });
     return created(res, user.toSafeJSON(), 'User created');
   })
 );
 
-router.post(
-  '/students/bulk',
-  [
-    body('students').isArray({ min: 1 }).withMessage('students must be a non-empty array'),
-  ],
-  asyncHandler(async (req, res) => {
-    const records = req.body.students;
-    if (!Array.isArray(records) || records.length === 0) {
-      return badRequest(res, 'students must be a non-empty array of student records');
-    }
-
-    const results = [];
-    let created = 0;
-    let skipped = 0;
-    const errors = [];
-
-    for (const record of records) {
-      const name = String(record?.name || '').trim();
-      const matric = String(record?.matric || '').trim().toUpperCase().replace(/^ABSU\//, '');
-      const department = String(record?.department || '').trim() || undefined;
-      const faculty = String(record?.faculty || '').trim() || undefined;
-      const phone = record?.phone ? String(record.phone).trim() : undefined;
-
-      if (!name || !matric) {
-        skipped += 1;
-        errors.push({ matric: matric || '-', reason: 'Missing name or matric number' });
-        continue;
-      }
-
-      const [first, ...rest] = name.split(/\s+/).filter(Boolean);
-      const email = deriveEmailFromMatric(matric);
-
-      const existingByMatric = await User.findOne({ matric_number: matric });
-      if (existingByMatric) {
-        skipped += 1;
-        results.push({ matric, name, status: 'skipped', reason: 'Matric already registered' });
-        continue;
-      }
-      const existingByEmail = await User.findOne({ email });
-      if (existingByEmail) {
-        skipped += 1;
-        results.push({ matric, name, status: 'skipped', reason: 'Login email already in use' });
-        continue;
-      }
-
-      await User.create({
-        first_name: first || name,
-        last_name: rest.join(' ') || '',
-        email,
-        password: GENERAL_STUDENT_PASSWORD,
-        role: 'student',
-        matric_number: matric,
-        department,
-        faculty,
-        phone,
-        mustChangePassword: true,
-        verificationStatus: 'verified',
-        isActive: true,
-      });
-      created += 1;
-      results.push({ matric, name, status: 'created' });
-    }
-
-    await logActivity({
-      actor: req.user,
-      action: 'STUDENTS_BULK_IMPORT',
-      entity: 'User',
-      details: { attempted: records.length, created, skipped },
-    });
-
-    return created(res, { created, skipped, results, errors }, `Created ${created} student account(s), skipped ${skipped}`);
-  })
-);
-
-const GENERAL_STUDENT_PASSWORD = 'student123';
-
-const deriveEmailFromMatric = (matric) => {
-  const cleaned = String(matric || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-  return `${cleaned}@absu.edu.ng`;
-};
-
 router.patch('/users/:id', asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) return notFound(res, 'User not found');
-  const allowed = ['first_name', 'last_name', 'role', 'matric_number', 'department', 'level', 'phone', 'staffType', 'verificationStatus', 'profileImage', 'staffNumber', 'title', 'faculty', 'identityInfo', 'isActive'];
+  const allowed = ['first_name', 'last_name', 'role', 'phone', 'profileImage', 'isActive'];
   allowed.forEach((field) => {
-    if (req.body[field] !== undefined) user[field] = req.body[field];
+    if (req.body[field] !== undefined) {
+      if (field === 'role' && !ALLOWED_ROLES.includes(req.body[field])) return;
+      user[field] = req.body[field];
+    }
   });
   await user.save();
   await logActivity({ actor: req.user, action: 'USER_UPDATED', entity: 'User', entityId: user._id });
@@ -167,35 +91,6 @@ router.delete('/users/:id', asyncHandler(async (req, res) => {
   if (!user) return notFound(res, 'User not found');
   await logActivity({ actor: req.user, action: 'USER_DELETED', entity: 'User', entityId: req.params.id });
   return ok(res, null, 'User deleted');
-}));
-
-// ----------------------- Staff verification -----------------------
-
-router.get('/staff-requests', asyncHandler(async (req, res) => {
-  const users = await User.find({ role: 'staff', verificationStatus: 'pending' }).sort({ createdAt: -1 });
-  return ok(res, users.map((u) => u.toSafeJSON()));
-}));
-
-router.post('/staff-requests/:id/verify', asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id);
-  if (!user) return notFound(res, 'User not found');
-  if (user.role !== 'staff') return badRequest(res, 'Not a staff account');
-  user.verificationStatus = 'verified';
-  user.isActive = true;
-  await user.save();
-  await logActivity({ actor: req.user, action: 'STAFF_VERIFIED', entity: 'User', entityId: user._id });
-  return ok(res, user.toSafeJSON(), 'Staff account verified');
-}));
-
-router.post('/staff-requests/:id/reject', asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id);
-  if (!user) return notFound(res, 'User not found');
-  if (user.role !== 'staff') return badRequest(res, 'Not a staff account');
-  user.verificationStatus = 'rejected';
-  user.isActive = false;
-  await user.save();
-  await logActivity({ actor: req.user, action: 'STAFF_REJECTED', entity: 'User', entityId: user._id });
-  return ok(res, user.toSafeJSON(), 'Staff account rejected');
 }));
 
 // ----------------------- Librarians -----------------------

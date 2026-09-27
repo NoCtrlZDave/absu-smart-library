@@ -1,4 +1,28 @@
 import mongoose from 'mongoose';
+import { getPhysicalLocation, getLocationByCategory, deriveLocationFromCategory } from '../services/locationMapper.js';
+import StructureNode from './StructureNode.js';
+
+const escapeRegExp = (value) => String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const sectionLabelFor = async (guide, fallback) => {
+  if (!guide || guide.pillar == null) return fallback;
+  const pillar = Number(guide.pillar);
+  const subject = guide.subject ? String(guide.subject).trim() : null;
+  try {
+    let node = null;
+    if (subject) {
+      node = await StructureNode.findOne({
+        type: 'section',
+        pillars: pillar,
+        name: { $regex: new RegExp(`^${escapeRegExp(subject)}$`, 'i') },
+      });
+    }
+    if (!node) node = await StructureNode.findOne({ type: 'section', pillars: pillar }).sort({ name: 1 });
+    return node ? node.name : fallback;
+  } catch {
+    return fallback;
+  }
+};
 
 const copySchema = new mongoose.Schema(
   {
@@ -81,15 +105,50 @@ const bookSchema = new mongoose.Schema(
 
 bookSchema.index({ title: 'text', publisher: 'text' });
 
-bookSchema.pre('save', function (next) {
+bookSchema.pre('save', async function (next) {
+  for (const copy of this.copies || []) {
+    const copyLoc = copy.location || {};
+    if (!copyLoc.rack && !copyLoc.shelf && !copyLoc.floor && !copyLoc.section) {
+      const byCall = getPhysicalLocation(copy.callNumber);
+      const derived = deriveLocationFromCategory(
+        this.category,
+        copyLoc.library || this.location?.library || 'Main Library'
+      );
+      if (byCall.mapped) {
+        copy.location = {
+          ...copyLoc,
+          floor: `Floor ${byCall.floor || 1}`,
+          section: await sectionLabelFor(byCall, byCall.subject || null),
+          rack: null,
+          shelf: null,
+        };
+      } else if (derived) {
+        copy.location = {
+          ...copyLoc,
+          ...derived,
+          section: await sectionLabelFor(derived.physicalLocation || derived, derived.section || null),
+        };
+      }
+    }
+    if (!copy.locationString) copy.locationString = buildLocationString(copy.location || this.location);
+  }
+
+  const bookLoc = this.location || {};
+  if (!bookLoc.rack && !bookLoc.shelf && !bookLoc.floor && !bookLoc.section) {
+    const derived = deriveLocationFromCategory(this.category, bookLoc.library || 'Main Library');
+    if (derived) {
+      this.location = {
+        ...bookLoc,
+        ...derived,
+        section: await sectionLabelFor(derived.physicalLocation || derived, derived.section || null),
+      };
+    }
+  }
+
   if (this.copies && this.copies.length) {
-    const loc = this.copies[0].location || this.location;
-    this.location = loc;
+    this.location = this.copies[0].location || this.location;
   }
   this.locationString = buildLocationString(this.location || {});
-  this.copies.forEach((c) => {
-    if (!c.locationString) c.locationString = buildLocationString(c.location || this.location);
-  });
   next();
 });
 
@@ -110,10 +169,16 @@ bookSchema.methods.toCatalogueJSON = function () {
   obj.author = obj.authors && obj.authors.length ? obj.authors.join(', ') : 'Unknown Author';
   if (!obj.location) obj.location = { library: 'Main Library' };
   obj.locationString = obj.locationString || buildLocationString(obj.location);
-  obj.copies = (obj.copies || []).map((c) => ({
-    ...c,
-    id: c.code || c._id.toString(),
-  }));
+  const categoryGuide = getLocationByCategory(obj.category);
+  obj.copies = (obj.copies || []).map((c) => {
+    const byCall = getPhysicalLocation(c.callNumber);
+    return {
+      ...c,
+      id: c.code || c._id.toString(),
+      physicalLocation: byCall.mapped ? byCall : categoryGuide,
+    };
+  });
+  obj.physicalLocation = obj.copies.length ? obj.copies[0].physicalLocation : categoryGuide;
   return obj;
 };
 

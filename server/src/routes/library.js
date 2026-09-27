@@ -36,7 +36,7 @@ router.post(
   authorize('librarian', 'admin'),
   asyncHandler(async (req, res) => {
     const { type } = req.params;
-    const { name, code, parent, capacity } = req.body;
+    const { name, code, parent, capacity, pillars } = req.body;
     if (!TYPES.includes(type)) return badRequest(res, `Type must be one of: ${TYPES.join(', ')}`);
     if (!name) return badRequest(res, 'Name is required');
 
@@ -49,7 +49,18 @@ router.post(
       }
     }
 
-    const node = await StructureNode.create({ type, name, code, parent: parent || null, capacity });
+    const validPillars = Array.isArray(pillars)
+      ? pillars.map((p) => Number(p)).filter((p) => Number.isInteger(p) && p >= 1)
+      : [];
+
+    const node = await StructureNode.create({
+      type,
+      name,
+      code,
+      parent: parent || null,
+      capacity,
+      pillars: validPillars,
+    });
     await logActivity({ actor: req.user, action: `${type.toUpperCase()}_CREATED`, entity: 'StructureNode', entityId: node._id });
     return created(res, node.toJSON(), `${type} created`);
   })
@@ -62,11 +73,16 @@ router.put(
   asyncHandler(async (req, res) => {
     const node = await StructureNode.findById(req.params.id);
     if (!node) return notFound(res, 'Node not found');
-    const { name, code, capacity, parent } = req.body;
+    const { name, code, capacity, parent, pillars } = req.body;
     if (name) node.name = name;
     if (code !== undefined) node.code = code;
     if (capacity !== undefined) node.capacity = capacity;
     if (parent !== undefined) node.parent = parent || null;
+    if (pillars !== undefined) {
+      node.pillars = Array.isArray(pillars)
+        ? pillars.map((p) => Number(p)).filter((p) => Number.isInteger(p) && p >= 1)
+        : [];
+    }
     await node.save();
     await logActivity({ actor: req.user, action: 'NODE_UPDATED', entity: 'StructureNode', entityId: node._id });
     return ok(res, node.toJSON(), 'Node updated');

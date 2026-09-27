@@ -1,29 +1,35 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Building2, Layers, Grid3X3, BookOpen } from 'lucide-react';
-import { Button, BookCover } from '../../components/common';
+import {
+  ArrowLeft, Building2, Layers, Milestone, BookOpen,
+  MapPin, ImageIcon, HelpCircle,
+} from 'lucide-react';
+import { Button, BookCover, Badge } from '../../components/common';
 import { useBooks } from '../../context/useBook';
-import { useAuth } from '../../context/useAuth';
 import './Public.css';
+
+const STEP_ICON = {
+  library: Building2,
+  floor: Layers,
+  pillar: Milestone,
+  book: BookOpen,
+};
+
+const STEP_LABEL = {
+  library: 'Library',
+  floor: 'Floor',
+  pillar: 'Pillar',
+  book: 'Book',
+};
 
 const BookLocation = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { user } = useAuth();
   const { getBook } = useBooks();
   const [book, setBook] = useState(null);
 
   useEffect(() => {
-    if (!user) {
-      navigate(`/login?redirect=${encodeURIComponent(`/books/${id}/location`)}`, { replace: true });
-      return;
-    }
     getBook(id).then(setBook);
-  }, [user, id, navigate, getBook]);
-
-  if (!user) {
-    return null;
-  }
+  }, [id, getBook]);
 
   if (!book) {
     return (
@@ -43,9 +49,56 @@ const BookLocation = () => {
     );
   }
 
-  const { library = 'Main Library', floor = 'Floor 1', section = 'Section A', rack = 'Rack 1', shelf = 'Shelf 1' } = book.location || {};
-  const description = book.location?.description ||
-    `This book is located in the ${book.category} section on ${floor} of the ${library}.`;
+  const phys = book.physicalLocation;
+  const mapped = Boolean(phys && phys.mapped);
+  const library = book.location?.library || 'Main Library';
+  const floor = phys?.floor ? `Floor ${phys.floor}` : (book.location?.floor || 'Floor 1');
+
+  const guideSteps = mapped ? (phys.guide || []) : [];
+  const steps = [
+    ...guideSteps,
+    ...(guideSteps.length
+      ? [{
+          kind: 'book',
+          title: 'The Book',
+          text: `Look for "${book.title}" on the shelves. Check the call number printed on the spine to confirm you have the right copy. If you can't find it, ask a librarian for assistance.`,
+          caption: `${book.title} by ${book.author}`,
+        }]
+      : []),
+  ];
+
+  const renderLegacySteps = () => {
+    if (!phys) return null;
+    return (
+      <div className="physical-navigation">
+        <h2>
+          <Milestone size={20} />
+          Physical Location Guide
+        </h2>
+        <p className="physical-navigation__summary">{phys.text}</p>
+        <ol className="physical-navigation__steps">
+          <li>Go to <strong>Pillar {phys.pillar}</strong>.</li>
+          <li>
+            Look for the sign <strong>{phys.prefix} - {phys.subject}</strong>
+            {phys.notes && <> <span className="physical-navigation__note">({phys.notes})</span></>}
+          </li>
+          {phys.arrow && (
+            <li>The books are on the <strong>{phys.arrow}</strong> side of the pillar.</li>
+          )}
+        </ol>
+      </div>
+    );
+  };
+
+  const renderUnmapped = () => (
+    <div className="physical-navigation physical-navigation--unmapped">
+      <h2>
+        <HelpCircle size={20} />
+        Physical Location Guide
+      </h2>
+      <p>{phys?.text || 'Location not mapped yet. Please ask a librarian for assistance.'}</p>
+    </div>
+  );
 
   return (
     <div className="book-location">
@@ -61,61 +114,121 @@ const BookLocation = () => {
             <div>
               <h1>Book Location</h1>
               <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-                {book.title}
+                {book.title} by {book.author}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="location-path">
-          <div className="location-node">
-            <div className="location-node-icon">
-              <Building2 size={24} />
-            </div>
-            <span className="location-node-label">Library</span>
-            <span className="location-node-value">{library}</span>
-          </div>
+        {mapped ? (
+          <>
+            <div className="location-path">
+              <div className="location-node">
+                <div className="location-node-icon"><Building2 size={24} /></div>
+                <span className="location-node-label">Library</span>
+                <span className="location-node-value">{library}</span>
+              </div>
 
-          <div className="location-node">
-            <div className="location-node-icon">
-              <Layers size={24} />
-            </div>
-            <span className="location-node-label">Floor</span>
-            <span className="location-node-value">{floor}</span>
-          </div>
+              <div className="location-connector">›</div>
 
-          <div className="location-node">
-            <div className="location-node-icon">
-              <Grid3X3 size={24} />
-            </div>
-            <span className="location-node-label">Section</span>
-            <span className="location-node-value">{section}</span>
-          </div>
+              <div className="location-node">
+                <div className="location-node-icon"><Layers size={24} /></div>
+                <span className="location-node-label">Floor</span>
+                <span className="location-node-value">{floor}</span>
+              </div>
 
-          <div className="location-node active">
-            <div className="location-node-icon">
-              <BookOpen size={24} />
-            </div>
-            <span className="location-node-label">Rack - Shelf</span>
-            <span className="location-node-value">{rack}, {shelf}</span>
-          </div>
-        </div>
+              <div className="location-connector">›</div>
 
-        <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', background: 'var(--background)', borderRadius: '12px' }}>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginBottom: '1rem' }}>
-            {description}
-          </p>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-            {book.available
-              ? `${book.availableCopies} of ${book.totalCopies} copies are available here`
-              : 'All copies are currently borrowed or reserved'}
-          </p>
-        </div>
+              <div className="location-node">
+                <div className="location-node-icon"><Milestone size={24} /></div>
+                <span className="location-node-label">Pillar</span>
+                <span className="location-node-value">Pillar {phys.pillar}</span>
+              </div>
+
+              <div className="location-connector">›</div>
+
+              <div className="location-node active">
+                <div className="location-node-icon"><BookOpen size={24} /></div>
+                <span className="location-node-label">Book</span>
+                <span className="location-node-value">{phys.subject}</span>
+              </div>
+            </div>
+
+            {steps.length > 0 ? (
+              <div className="location-guide">
+                <div className="location-guide__heading">
+                  <h2>
+                    <MapPin size={20} />
+                    Step-by-Step Directions
+                  </h2>
+                  <p>Follow these steps and the photos to find your book.</p>
+                </div>
+
+                <ol className="location-guide__timeline">
+                  {steps.map((step, i) => {
+                    const Icon = STEP_ICON[step.kind] || MapPin;
+                    const label = STEP_LABEL[step.kind] || `Step ${i + 1}`;
+                    return (
+                      <li key={`${step.kind}-${i}`} className="location-step">
+                        <div className="location-step__badge">
+                          <Icon size={20} />
+                          <span className="location-step__label">{label}</span>
+                        </div>
+                        <div className="location-step__body">
+                          <div className="location-step__num">Step {i + 1}</div>
+                          <h3 className="location-step__title">{step.title}</h3>
+                          <p className="location-step__text">{step.text}</p>
+                          <div className="location-step__media">
+                            {step.kind === 'book' && book.coverImage ? (
+                              <img src={book.coverImage} alt={book.title} className="location-step__image" />
+                            ) : step.kind === 'book' ? (
+                              <div className="location-step__cover">
+                                <BookCover book={book} size="large" />
+                              </div>
+                            ) : step.image ? (
+                              <img src={step.image} alt={step.caption || step.title} className="location-step__image" />
+                            ) : (
+                              <div className="location-step__placeholder">
+                                <ImageIcon size={28} />
+                                <span>Photo coming soon</span>
+                              </div>
+                            )}
+                            {step.caption && <div className="location-step__caption">{step.caption}</div>}
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+
+                <div className="location-guide__final">
+                  <BookCover book={book} size="medium" />
+                  <div>
+                    <h3>You found it!</h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.35rem' }}>
+                      {book.title} lives at {floor}, {phys.subject}
+                      {phys.arrow ? ` - ${phys.arrow} side` : ''} of Pillar {phys.pillar}.
+                    </p>
+                    <div style={{ marginTop: '0.75rem' }}>
+                      <Badge variant={book.available ? 'success' : 'warning'}>
+                        {book.available ? `${book.availableCopies} copies available` : `${book.totalCopies} copies`}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              renderLegacySteps()
+            )}
+          </>
+        ) : (
+          renderUnmapped()
+        )}
 
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
           <Link to={`/books/${id}`}>
             <Button>
-              <ArrowLeft size={18} />
+              <MapPin size={18} />
               Return to Book Details
             </Button>
           </Link>

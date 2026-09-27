@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap');
 
 /* ============================================
    CSS Reset (Minimal)
@@ -72,64 +72,74 @@ table {
    ============================================ */
 
 :root {
+  /* --- Brand Palette --- */
+  --brand-navy: #06163f;
+  --brand-navy-2: #0b2458;
+  --brand-gold: #E99A3A;
+  --brand-gold-soft: #f6edcf;
+
   /* --- Color Palette --- */
-  --primary: #1B5E20;
-  --primary-light: #2E7D32;
-  --primary-dark: #0D3B12;
-  --primary-50: #E8F5E9;
-  --primary-100: #C8E6C9;
-  --primary-200: #A5D6A7;
-  --primary-700: #388E3C;
-  --primary-800: #2E7D32;
-  --primary-900: #1B5E20;
+  --primary: var(--brand-navy-2);
+  --primary-light: #1e3a75;
+  --primary-dark: var(--brand-navy);
+  --primary-50: #eef1f8;
+  --primary-100: #dde3f1;
+  --primary-200: #bcc7e3;
+  --primary-700: #14306b;
+  --primary-800: #0a1f4d;
+  --primary-900: #07183e;
+  --primary-deep: var(--brand-navy);
 
-  --accent: #F9A825;
-  --accent-dark: #F57F17;
-  --accent-light: #FBC02D;
-  --accent-50: #FFF8E1;
+  --accent: var(--brand-gold);
+  --accent-dark: #d4831f;
+  --accent-light: #f2b45f;
+  --accent-50: var(--brand-gold-soft);
 
-  --background: #F5F5F5;
-  --surface: #FFFFFF;
-  --surface-alt: #FAFAFA;
-  --surface-elevated: #FFFFFF;
+  --background: #f8f7f4;
+  --surface: #ffffff;
+  --surface-alt: #f8f7f4;
+  --surface-muted: #f1efeb;
+  --surface-elevated: #ffffff;
 
-  --text: #1A1A1A;
-  --text-secondary: #666666;
-  --text-muted: #999999;
-  --text-inverse: #FFFFFF;
-  --text-on-primary: #FFFFFF;
-  --text-on-accent: #1A1A1A;
+  --text: #111827;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #76808d;
+  --text-inverse: #ffffff;
+  --text-on-primary: #ffffff;
+  --text-on-accent: var(--brand-navy);
 
-  --border: #E0E0E0;
-  --border-light: #EEEEEE;
-  --border-dark: #BDBDBD;
+  --border: #dcd9d2;
+  --border-light: #e7e3dc;
+  --border-dark: #c3beb2;
 
   /* Status Colors */
-  --status-available: #2E7D32;
-  --status-available-bg: #E8F5E9;
-  --status-borrowed: #0288D1;
-  --status-borrowed-bg: #E1F5FE;
-  --status-reserved: #ED6C02;
-  --status-reserved-bg: #FFF3E0;
-  --status-overdue: #D32F2F;
-  --status-overdue-bg: #FFEBEE;
-  --status-misplaced: #E64A19;
-  --status-misplaced-bg: #FBE9E7;
-  --status-maintenance: #757575;
-  --status-maintenance-bg: #F5F5F5;
+  --status-available: #0e9f6e;
+  --status-available-bg: #e8f6f0;
+  --status-borrowed: #0284c7;
+  --status-borrowed-bg: #e0f2fe;
+  --status-reserved: #d97706;
+  --status-reserved-bg: #fffbeb;
+  --status-overdue: #dc2626;
+  --status-overdue-bg: #fef2f2;
+  --status-misplaced: #ea580c;
+  --status-misplaced-bg: #fff7ed;
+  --status-maintenance: #6b7280;
+  --status-maintenance-bg: #f3f4f6;
 
   /* Semantic Colors */
-  --success: #2E7D32;
-  --success-bg: #E8F5E9;
-  --warning: #ED6C02;
-  --warning-bg: #FFF3E0;
-  --danger: #D32F2F;
-  --danger-bg: #FFEBEE;
-  --info: #0288D1;
-  --info-bg: #E1F5FE;
+  --success: #0e9f6e;
+  --success-bg: #e8f6f0;
+  --warning: #d97706;
+  --warning-bg: #fffbeb;
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+  --info: #2563eb;
+  --info-bg: #eff6ff;
 
   /* --- Typography --- */
   --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  --font-display: 'Sora', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
 
   --text-xs: 0.75rem;
@@ -140,6 +150,8 @@ table {
   --text-2xl: 1.5rem;
   --text-3xl: 1.875rem;
   --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
 
   --leading-tight: 1.25;
   --leading-normal: 1.5;
@@ -167,24 +179,28 @@ table {
   --space-24: 6rem;
 
   /* --- Border Radius --- */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.375rem;
+  --radius-3xl: 1.75rem;
   --radius-full: 9999px;
 
   /* --- Shadows --- */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  --shadow-xs: 0 1px 2px rgba(6, 22, 63, 0.06);
+  --shadow-sm: 0 1px 2px rgba(6, 22, 63, 0.05), 0 2px 6px rgba(6, 22, 63, 0.05);
+  --shadow-md: 0 6px 16px -6px rgba(6, 22, 63, 0.12), 0 2px 4px rgba(6, 22, 63, 0.04);
+  --shadow-lg: 0 12px 32px -8px rgba(6, 22, 63, 0.18), 0 4px 8px rgba(6, 22, 63, 0.05);
+  --shadow-xl: 0 24px 48px -12px rgba(6, 22, 63, 0.28), 0 8px 16px rgba(6, 22, 63, 0.06);
+  --shadow-card: 0 1px 2px rgba(6, 22, 63, 0.04), 0 8px 24px rgba(6, 22, 63, 0.07);
+  --shadow-card-hover: 0 2px 4px rgba(6, 22, 63, 0.05), 0 20px 40px -12px rgba(6, 22, 63, 0.22);
+  --shadow-gold: 0 8px 24px -8px rgba(233, 154, 58, 0.55);
 
   /* --- Transitions --- */
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow: 350ms ease;
+  --transition-fast: 160ms cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-normal: 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-slow: 450ms cubic-bezier(0.22, 1, 0.36, 1);
 
   /* --- Z-Index Layers --- */
   --z-base: 0;
@@ -231,19 +247,20 @@ h3,
 h4,
 h5,
 h6 {
+  font-family: var(--font-display);
   font-weight: var(--font-bold);
   line-height: var(--leading-tight);
   color: var(--text);
 }
 
 h1 {
-  font-size: var(--text-4xl);
-  letter-spacing: -0.025em;
+  font-size: var(--text-5xl);
+  letter-spacing: -0.03em;
 }
 
 h2 {
   font-size: var(--text-3xl);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
 h3 {
@@ -307,12 +324,12 @@ hr {
 }
 
 ::selection {
-  background-color: var(--primary-100);
-  color: var(--primary-dark);
+  background-color: var(--accent-50);
+  color: var(--brand-navy);
 }
 
 :focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -609,8 +626,8 @@ hr {
 .card {
   background-color: var(--surface);
   border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 
@@ -638,14 +655,18 @@ hr {
   gap: var(--space-2);
   padding: 0.625rem 1.25rem;
   font-size: var(--text-sm);
-  font-weight: var(--font-medium);
+  font-weight: var(--font-semibold);
   line-height: 1;
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   cursor: pointer;
   white-space: nowrap;
   transition: all var(--transition-fast);
   user-select: none;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.99);
 }
 
 .btn:disabled,
@@ -659,22 +680,26 @@ hr {
   background-color: var(--primary);
   color: var(--text-on-primary);
   border-color: var(--primary);
+  box-shadow: 0 6px 16px -8px rgba(6, 22, 63, 0.6);
 }
 
 .btn-primary:hover {
   background-color: var(--primary-light);
   border-color: var(--primary-light);
+  box-shadow: 0 8px 20px -8px rgba(6, 22, 63, 0.55);
 }
 
 .btn-accent {
   background-color: var(--accent);
   color: var(--text-on-accent);
   border-color: var(--accent);
+  box-shadow: var(--shadow-gold);
 }
 
 .btn-accent:hover {
   background-color: var(--accent-dark);
   border-color: var(--accent-dark);
+  box-shadow: 0 10px 28px -8px rgba(233, 154, 58, 0.5);
 }
 
 .btn-outline {
@@ -755,7 +780,7 @@ hr {
 .textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-100);
+  box-shadow: 0 0 0 3px var(--accent-50);
 }
 
 .input::placeholder,
@@ -1021,7 +1046,7 @@ hr {
   background-color: var(--success-bg);
   color: var(--success);
   border-color: var(--success);
-  border-color: rgba(46, 125, 50, 0.2);
+  border-color: rgba(14, 159, 110, 0.2);
 }
 
 .alert-warning {

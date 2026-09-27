@@ -53,9 +53,7 @@ function Navbar({ user = null, onLogout }) {
 
   const getDashboardPath = (userObj) => {
     if (userObj?.role === 'admin') return '/admin/dashboard';
-    if (userObj?.role === 'librarian') return '/librarian/dashboard';
-    if (userObj?.role === 'staff') return '/staff/dashboard';
-    return '/student/dashboard';
+    return '/librarian/dashboard';
   };
 
   return (

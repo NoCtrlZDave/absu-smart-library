@@ -11,7 +11,7 @@ import {
 import { Button, Input } from '../components/common';
 import { useAuth } from '../context/useAuth';
 import { useToast } from '../components/common/useToast';
-import '../pages/student/Student.css';
+import './ProfilePage.css';
 
 const ProfilePage = () => {
   const { user, changePassword } = useAuth();
@@ -119,9 +119,7 @@ const ProfilePage = () => {
       ? 'Administrator'
       : user?.role === 'librarian'
       ? 'Librarian'
-      : user?.role === 'staff'
-      ? 'Staff'
-      : 'Student';
+      : user?.role || '';
 
   return (
     <div className="student-page">
@@ -141,7 +139,7 @@ const ProfilePage = () => {
             <span
               className="badge"
               style={{
-                background: 'rgba(26, 86, 50, 0.1)',
+                background: 'rgba(233, 154, 58, 0.12)',
                 color: 'var(--primary)',
                 padding: '2px 10px',
                 borderRadius: '4px',

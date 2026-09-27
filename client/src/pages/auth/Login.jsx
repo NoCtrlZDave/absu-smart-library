@@ -8,8 +8,6 @@ import './Auth.css';
 const ROLE_REDIRECT = {
   admin: '/admin/dashboard',
   librarian: '/librarian/dashboard',
-  student: '/student/dashboard',
-  staff: '/staff/dashboard',
 };
 
 const SAFE_REDIRECT = ['/search', '/about', '/'];
@@ -49,8 +47,8 @@ const Login = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.identifier) newErrors.identifier = 'Email or matric number is required';
-    else if (formData.identifier.includes('@') && !/\S+@\S+\.\S+/.test(formData.identifier))
+    if (!formData.identifier) newErrors.identifier = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(formData.identifier))
       newErrors.identifier = 'Email is invalid';
     if (!formData.password) newErrors.password = 'Password is required';
     else if (formData.password.length < 6)
@@ -69,9 +67,7 @@ const Login = () => {
     try {
       const result = await login(formData.identifier, formData.password);
       if (result.success) {
-        if (result.user.mustChangePassword) {
-          navigate('/force-password-change', { state: { from: redirect || undefined } });
-        } else if (redirect && isSafeRedirect(redirect)) {
+        if (redirect && isSafeRedirect(redirect)) {
           navigate(redirect);
         } else {
           navigate(ROLE_REDIRECT[result.user.role]);
@@ -89,7 +85,7 @@ const Login = () => {
       <div className="auth-card">
         <div className="auth-logo">
           <h1>ABSU Smart Library</h1>
-          <p>Welcome back! Please sign in to your account.</p>
+          <p>Administrator and librarian sign in.</p>
         </div>
 
         {errors.general && (
@@ -98,13 +94,13 @@ const Login = () => {
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-row">
-            <label htmlFor="identifier">Email or Matric Number</label>
+            <label htmlFor="identifier">Email</label>
             <div style={{ position: 'relative' }}>
               <Input
                 id="identifier"
                 name="identifier"
                 type="text"
-                placeholder="staff@absu.edu.ng or 2021/131178/regular"
+                placeholder="admin@absu.edu.ng"
                 value={formData.identifier}
                 onChange={handleChange}
                 icon={Hash}
@@ -173,16 +169,6 @@ const Login = () => {
           </Button>
         </form>
 
-        <div className="auth-footer">
-          <p>
-            {"Student accounts are created by the library administrator using your matric number. "}
-            {'Staff (teaching / non-teaching)? '}
-            <Link to="/staff/signup" className="forgot-link">
-              Create a staff account
-            </Link>
-          </p>
-        </div>
-
         <div className="demo-accounts">
           <p className="demo-title">Demo Accounts</p>
           <div className="demo-list">
@@ -213,34 +199,6 @@ const Login = () => {
             >
               <span className="demo-role librarian">Librarian</span>
               librarian@absu.edu.ng
-            </button>
-            <button
-              type="button"
-              className="demo-btn"
-              onClick={() =>
-                setFormData((p) => ({
-                  ...p,
-                  identifier: '2021/131178/regular',
-                  password: 'student123',
-                }))
-              }
-            >
-              <span className="demo-role student">Student</span>
-              matric 2021/131178/regular
-            </button>
-            <button
-              type="button"
-              className="demo-btn"
-              onClick={() =>
-                setFormData((p) => ({
-                  ...p,
-                  identifier: 'staff.verified@absu.edu.ng',
-                  password: 'staff123',
-                }))
-              }
-            >
-              <span className="demo-role staff">Staff</span>
-              staff.verified@absu.edu.ng
             </button>
           </div>
         </div>

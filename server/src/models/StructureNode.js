@@ -12,6 +12,7 @@ const structureNodeSchema = new mongoose.Schema(
     code: { type: String, default: null },
     parent: { type: mongoose.Schema.Types.ObjectId, ref: 'StructureNode', default: null },
     capacity: { type: Number, default: null },
+    pillars: { type: [Number], default: [], index: true },
   },
   { timestamps: true }
 );

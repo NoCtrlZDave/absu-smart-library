@@ -1,0 +1,211 @@
+{
+  "media": {
+    "entrance": {
+      "image": "",
+      "caption": "ABSU Library main entrance"
+    },
+    "floors": {
+      "1": {
+        "image": "",
+        "caption": "First Floor - main book hall (Pillars 1 - 13)"
+      },
+      "2": {
+        "image": "",
+        "caption": "Second Floor - student projects, Guinness World Records and record storage"
+      }
+    },
+    "pillars": {
+      "1": { "image": "", "caption": "Pillar 1 - History and International Relations / Philosophy" },
+      "2": { "image": "", "caption": "Pillar 2 - Geography, Social Sciences and Economics" },
+      "3": { "image": "", "caption": "Pillar 3 - Economic Theory, Management and Estate Management" },
+      "4": { "image": "", "caption": "Pillar 4 - Commerce, Marketing, Accounting and Industries" },
+      "5": { "image": "", "caption": "Pillar 5 - Finance, Banking, Sociology and Commerce" },
+      "6": { "image": "", "caption": "Pillar 6 - Urban and Regional Planning / Political Science" },
+      "7": { "image": "", "caption": "Pillar 7 - Fine and Applied Arts, Education and Music" },
+      "8": { "image": "", "caption": "Pillar 8 - Silence zone" },
+      "9": { "image": "", "caption": "Pillar 9 - Science, Mathematics, Optometry and Medicine" },
+      "10": { "image": "", "caption": "Pillar 10 - Physics, Statistics and Computer Science" },
+      "11": { "image": "", "caption": "Pillar 11 - Chemistry, Biology, Geology and Biochemistry" },
+      "12": { "image": "", "caption": "Pillar 12 - Engineering, Microbiology and Pathology" },
+      "13": { "image": "", "caption": "Pillar 13 - Library Science and Computer Engineering" }
+    },
+    "subjects": {}
+  },
+  "library_map": {
+    "1": {
+      "pillar_number": "1",
+      "floor": 1,
+      "subjects": [
+        { "prefix": "D-F", "subject": "HISTORY AND INTERNATIONAL RELATIONS", "arrow": "Right" },
+        { "prefix": "BF", "subject": "PHILOSOPHY", "arrow": "Left" }
+      ]
+    },
+    "2": {
+      "pillar_number": "2",
+      "floor": 1,
+      "subjects": [
+        { "prefix": "G", "subject": "Geography (General) Atlases. Globes. maps. Unlocalized maps." },
+        { "prefix": "GA", "subject": "Mathematical Geography Cartography" },
+        { "prefix": "GB", "subject": "Physical Geography" },
+        { "prefix": "GC", "subject": "Oceanography" },
+        { "prefix": "GE", "subject": "Environmental Sciences" },
+        { "prefix": "GF", "subject": "Human Ecology. Anthropogeography" },
+        { "prefix": "GN", "subject": "Anthropology" },
+        { "prefix": "GR", "subject": "Folklore" },
+        { "prefix": "GT", "subject": "Manners and customs (General)" },
+        { "prefix": "GV", "subject": "Recreation. Leisure" },
+        { "prefix": "H", "subject": "Social Sciences" },
+        { "prefix": "HA", "subject": "Statistics" },
+        { "prefix": "D-F", "subject": "HISTORY AND INTERNATIONAL RELATIONS" },
+        { "prefix": "ECONOMICS", "subject": "ECONOMICS", "arrow": "Right" },
+        { "prefix": "G-GN", "subject": "GEOGRAPHY AND PLANNING", "arrow": "Left" }
+      ]
+    },
+    "3": {
+      "pillar_number": "3",
+      "floor": 1,
+      "subjects": [
+        { "prefix": "HB", "subject": "Economic Theory Demography" },
+        { "prefix": "HC", "subject": "Economic History and Conditions" },
+        { "prefix": "HD", "subject": "Management and Economic History and Conditions" },
+        { "prefix": "HD", "subject": "ESTATE MANAGEMENT", "arrow": "Right", "notes": "ETF 2006/2007" }
+      ]
+    },
+    "4": {
+      "pillar_number": "4",
+      "floor": 1,
+      "subjects": [
+        { "prefix": "HD", "subject": "Industries, Land Use: Labour" },
+        { "prefix": "HE", "subject": "Transportation and communication." },
+        { "prefix": "HF", "subject": "Commerce | MARKETING", "arrow": "Left" },
+        { "prefix": "HF", "subject": "ACCOUNTING", "arrow": "Right" }
+      ]
+    },
+    "5": {
+      "pillar_number": "5",
+      "floor": 1,
+      "subjects": [
+        { "prefix": "HF", "subject": "Commerce" },
+        { "prefix": "HG", "subject": "Finance" },
+        { "prefix": "HJ", "subject": "Public Finance" },
+        { "prefix": "HM", "subject": "Sociology General" },
+        { "prefix": "BANKING AND FINANCE", "subject": "BANKING AND FINANCE", "arrow": "Left and Right", "notes": "ETF 2006/2007" },
+        { "prefix": "HM", "subject": "SOCIOLOGY" }
+      ]
+    },
+    "6": {
+      "pillar_number": "6",
+      "floor": 1,
+      "subjects": [
+        { "prefix": "URBAN AND REGIONAL PLANNING", "subject": "URBAN AND REGIONAL PLANNING", "arrow": "Left" },
+        { "prefix": "J – JZ", "subject": "POLITICAL SCIENCE" }
+      ]
+    },
+    "7": {
+      "pillar_number": "7",
+      "floor": 1,
+      "subjects": [
+        { "prefix": "N", "subject": "Visual Arts" },
+        { "prefix": "NA", "subject": "Architecture" },
+        { "prefix": "NB", "subject": "Sculpture" },
+        { "prefix": "NC", "subject": "Drawing, Design, illustration" },
+        { "prefix": "ND", "subject": "Painting" },
+        { "prefix": "NK", "subject": "Decorative Arts" },
+        { "prefix": "NX", "subject": "Arts in General." },
+        { "prefix": "N", "subject": "FINE AND APPLIED ARTS" },
+        { "prefix": "L", "subject": "Education" },
+        { "prefix": "LA", "subject": "History of Education" },
+        { "prefix": "LB", "subject": "Theory and Practice of Education" },
+        { "prefix": "LC", "subject": "Special aspects Of education" },
+        { "prefix": "LG", "subject": "Industrial Institutions; Asia, Africa, Oceania." },
+        { "prefix": "M", "subject": "Music" },
+        { "prefix": "ML", "subject": "Literature on music" },
+        { "prefix": "MT", "subject": "Musical Instruction and Study" },
+        { "prefix": "LB - LG", "subject": "EDUCATION", "arrow": "Right" },
+        { "prefix": "LB", "subject": "EDUCATION MANAGEMENT & PLANNING", "arrow": "Right" },
+        { "prefix": "LB", "subject": "EDUCATION SOCIAL STUDIES", "arrow": "Right" }
+      ]
+    },
+    "8": {
+      "pillar_number": "8",
+      "floor": 1,
+      "subjects": [],
+      "notes": "Silence zone. No eating, no drinking. No phone calls."
+    },
+    "9": {
+      "pillar_number": "9",
+      "floor": 1,
+      "subjects": [
+        { "prefix": "Q", "subject": "Science (General)" },
+        { "prefix": "QA", "subject": "Mathematics" },
+        { "prefix": "OPTOMETRY", "subject": "OPTOMETRY", "arrow": "Right" },
+        { "prefix": "R", "subject": "MEDCINE & SURGERY", "arrow": "Right" },
+        { "prefix": "MEDICAL LABORATORY SCIENCE", "subject": "MEDICAL LABORATORY SCIENCE", "arrow": "Right" },
+        { "prefix": "PHARMACY", "subject": "PHARMACY" },
+        { "prefix": "MEDICINE & SURGERY", "subject": "MEDICINE & SURGERY", "arrow": "Right" }
+      ]
+    },
+    "10": {
+      "pillar_number": "10",
+      "floor": 1,
+      "subjects": [
+        { "prefix": "QC", "subject": "PHYSICS", "arrow": "Left" },
+        { "prefix": "STATISTICS", "subject": "STATISTICS", "arrow": "Right", "notes": "ETF 2002" },
+        { "prefix": "COMPUTER SCIENCE", "subject": "COMPUTER SCIENCE", "arrow": "Right" }
+      ]
+    },
+    "11": {
+      "pillar_number": "11",
+      "floor": 1,
+      "subjects": [
+        { "prefix": "QD", "subject": "Chemistry" },
+        { "prefix": "QE", "subject": "Geology" },
+        { "prefix": "QH", "subject": "Biology" },
+        { "prefix": "QK", "subject": "Botany" },
+        { "prefix": "QL", "subject": "Zoology" },
+        { "prefix": "QM", "subject": "Human Anat" },
+        { "prefix": "QP", "subject": "Physiol" },
+        { "prefix": "CHEMISTRY", "subject": "CHEMISTRY", "arrow": "Right" },
+        { "prefix": "BIOCHEMISTRY", "subject": "BIOCHEMISTRY", "arrow": "Right" },
+        { "prefix": "GEOLOGY", "subject": "GEOLOGY", "arrow": "Right" },
+        { "prefix": "BIOLOGICAL SCIENCES", "subject": "BIOLOGICAL SCIENCES", "arrow": "Right" },
+        { "prefix": "QK", "subject": "PLANT SCIENCE AND BIOTECHNOLOGY", "arrow": "Left" },
+        { "prefix": "QD", "subject": "CHEMISTRY", "arrow": "Right" },
+        { "prefix": "QL", "subject": "ANIMAL & ENVIRONMENTAL BIOLOGY (ZOOLOGY)", "arrow": "Right" },
+        { "prefix": "BIOCHEMISTRY", "subject": "BIOCHEMISTRY" },
+        { "prefix": "ANATOMY", "subject": "ANATOMY", "arrow": "Left" }
+      ]
+    },
+    "12": {
+      "pillar_number": "12",
+      "floor": 1,
+      "subjects": [
+        { "prefix": "QR", "subject": "MICROBIOLOGY" },
+        { "prefix": "ELECTRICAL ELECTRONIC ENGINEERING", "subject": "ELECTRICAL ELECTRONIC ENGINEERING", "arrow": "Left" },
+        { "prefix": "MECHANICAL ENGINEERING", "subject": "MECHANICAL ENGINEERING", "arrow": "Left" },
+        { "prefix": "CIVIL ENGINEERING", "subject": "CIVIL ENGINEERING", "arrow": "Left" },
+        { "prefix": "MICROBIOLOGY", "subject": "MICROBIOLOGY", "arrow": "Right" },
+        { "prefix": "BIOLOGY", "subject": "BIOLOGY", "arrow": "Right" },
+        { "prefix": "BIOCHEMISTRY", "subject": "BIOCHEMISTRY", "arrow": "Right" },
+        { "prefix": "PATHOLOGY", "subject": "PATHOLOGY", "arrow": "Right" },
+        { "prefix": "ECOLOGY", "subject": "ECOLOGY", "arrow": "Right" },
+        { "prefix": "VIROLOGY", "subject": "VIROLOGY", "arrow": "Right" },
+        { "prefix": "BIOPHYSIOLOGY", "subject": "BIOPHYSIOLOGY", "arrow": "Right" },
+        { "prefix": "ENTOMOLOGY", "subject": "ENTOMOLOGY", "arrow": "Right" },
+        { "prefix": "CIVIL ENGINEERING", "subject": "CIVIL ENGINEERING", "arrow": "Left" },
+        { "prefix": "BUILDING TECHNOLOGY", "subject": "BUILDING TECHNOLOGY", "arrow": "Left" },
+        { "prefix": "SURVEYING AND GEOMATICS", "subject": "SURVEYING AND GEOMATICS", "arrow": "Right" },
+        { "prefix": "MICROBIOLOGY", "subject": "MICROBIOLOGY", "arrow": "Right" }
+      ]
+    },
+    "13": {
+      "pillar_number": "13",
+      "floor": 1,
+      "subjects": [
+        { "prefix": "Z", "subject": "LIBRARY AND INFORMATION SCIENCE", "arrow": "Left" },
+        { "prefix": "COMPUTER ENGINEERING", "subject": "COMPUTER ENGINEERING", "arrow": "Right" },
+        { "prefix": "ELECTRICAL ELECTRONIC ENGINEERING", "subject": "ELECTRICAL ELECTRONIC ENGINEERING", "arrow": "Right" }
+      ]
+    }
+  }
+}

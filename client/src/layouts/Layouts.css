@@ -17,9 +17,21 @@
 
 .layout-public__footer,
 .layout-student__footer {
-  background: var(--primary-dark);
-  color: rgba(255, 255, 255, 0.8);
-  padding: 40px 24px;
+  position: relative;
+  background: linear-gradient(180deg, var(--primary) 0%, var(--brand-navy) 55%, var(--brand-navy) 100%);
+  color: rgba(255, 255, 255, 0.78);
+  padding: 64px 24px 40px;
+}
+
+.layout-public__footer::before,
+.layout-student__footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 45%, var(--accent-dark) 100%);
 }
 
 .footer__inner {
@@ -27,22 +39,24 @@
   margin: 0 auto;
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 32px;
+  gap: 40px;
 }
 
 .footer__brand {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .footer__brand-name {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #fff;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
 }
 
 .footer__brand-logo {
@@ -54,42 +68,44 @@
 }
 
 .footer__brand-desc {
-  font-size: 0.85rem;
-  opacity: 0.7;
-  line-height: 1.6;
+  font-size: 0.875rem;
+  opacity: 0.65;
+  line-height: 1.7;
+  max-width: 360px;
 }
 
 .footer__column-title {
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #fff;
-  margin-bottom: 12px;
+  letter-spacing: 1.5px;
+  color: var(--accent);
+  margin-bottom: 16px;
 }
 
 .footer__link {
   display: block;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
-  padding: 4px 0;
-  transition: color var(--transition-fast);
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.72);
+  padding: 5px 0;
+  transition: color var(--transition-fast), transform var(--transition-fast);
 }
 
 .footer__link:hover {
   color: var(--accent);
+  transform: translateX(3px);
 }
 
 .footer__bottom {
   max-width: 1200px;
-  margin: 24px auto 0;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 40px auto 0;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 0.8rem;
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
 @media (max-width: 768px) {

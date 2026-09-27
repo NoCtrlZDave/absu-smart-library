@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 55%, var(--primary-deep) 100%);
   padding: 2rem;
   position: relative;
   overflow: hidden;
@@ -260,7 +260,7 @@
 }
 
 .demo-role.student {
-  background: rgba(46, 125, 50, 0.1);
+  background: rgba(14, 159, 110, 0.1);
   color: var(--success);
 }
 

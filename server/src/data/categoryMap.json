@@ -1,0 +1,47 @@
+{
+  "categories": {
+    "COMPUTER SCIENCE": {
+      "prefixes": ["COMPUTER SCIENCE", "COMPUTER ENGINEERING"]
+    },
+    "ENGINEERING": {
+      "prefixes": [
+        "CIVIL ENGINEERING",
+        "MECHANICAL ENGINEERING",
+        "ELECTRICAL ELECTRONIC ENGINEERING",
+        "BUILDING TECHNOLOGY",
+        "SURVEYING AND GEOMATICS",
+        "COMPUTER ENGINEERING"
+      ]
+    },
+    "MEDICINE": {
+      "prefixes": ["MEDICINE & SURGERY", "PHARMACY", "MEDICAL LABORATORY SCIENCE", "OPTOMETRY"]
+    },
+    "LAW": {
+      "prefixes": []
+    },
+    "BUSINESS": {
+      "prefixes": ["HF", "BANKING AND FINANCE", "ECONOMICS"]
+    },
+    "EDUCATION": {
+      "prefixes": ["LB", "LB - LG", "LA", "L"]
+    },
+    "PHYSICS": {
+      "prefixes": ["QC"]
+    },
+    "CHEMISTRY": {
+      "prefixes": ["CHEMISTRY", "QD", "BIOCHEMISTRY"]
+    },
+    "MATHEMATICS": {
+      "prefixes": ["QA", "STATISTICS"]
+    },
+    "SOCIAL SCIENCES": {
+      "prefixes": ["H", "HM", "HA"]
+    },
+    "ARTS & HUMANITIES": {
+      "prefixes": ["N", "D-F", "M", "NX"]
+    },
+    "AGRICULTURE": {
+      "prefixes": ["QK", "QL", "QH"]
+    }
+  }
+}

@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Upload, BookOpen, Hash, User, Building2, Calendar, Save, ArrowLeft,
-  MapPin, Layers, Plus, Trash2, Boxes, FileText, Tag, Library, Stamp,
+  MapPin, Layers, Plus, Trash2, Boxes, FileText, Tag, Library, Stamp, Milestone,
 } from 'lucide-react';
 import { Button, Input, Select, Badge } from '../../components/common';
 import { CATEGORIES } from '../../data/books';
@@ -12,6 +12,7 @@ import { useAuth } from '../../context/useAuth';
 import { useToast } from '../../components/common/useToast';
 import { booksApi } from '../../services/books';
 import { libraryApi } from '../../services/library';
+import { locationApi } from '../../services/location';
 import './Librarian.css';
 
 const FORMATS = ['Paperback', 'Hardcover', 'E-book', 'Journal', 'Other'];
@@ -148,6 +149,9 @@ const AddBook = ({ basePath = '/librarian' }) => {
   const [structure, setStructure] = useState([]);
   const [loadingExisting, setLoadingExisting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [categoryGuides, setCategoryGuides] = useState({});
+  const [copyHints, setCopyHints] = useState({});
+  const autoShelfId = useRef(null);
 
   const fallbackCategories = useMemo(
     () => CATEGORIES,
@@ -168,11 +172,91 @@ const AddBook = ({ basePath = '/librarian' }) => {
     return opts;
   }, [shelves, nodesById]);
 
+  const pillarByShelfId = useMemo(() => {
+    const map = {};
+    shelves.forEach((s) => {
+      const pillars = [];
+      let cur = s;
+      while (cur) {
+        (cur.pillars || []).forEach((p) => {
+          const n = Number(p);
+          if (Number.isInteger(n) && !pillars.includes(n)) pillars.push(n);
+        });
+        cur = cur.parent && nodesById.get(cur.parent) ? nodesById.get(cur.parent) : null;
+      }
+      map[s.id] = pillars;
+    });
+    return map;
+  }, [shelves, nodesById]);
+
+  const guideForCategory = (category) =>
+    categoryGuides[String(category || '').toUpperCase()] || null;
+
+  const recommendedShelfId = useMemo(() => {
+    const guide = categoryGuides[String(form.category || '').toUpperCase()];
+    const pillar = guide && guide.mapped && guide.pillar != null ? Number(guide.pillar) : null;
+    if (!pillar) return '';
+    return shelves.find((s) => (pillarByShelfId[s.id] || []).includes(pillar))?.id || '';
+  }, [form.category, shelves, pillarByShelfId, categoryGuides]);
+
+  const resolveCallNumber = (key, callNumber, copyShelfId = '') => {
+    const value = String(callNumber || '').trim();
+    if (!value) {
+      setCopyHints((prev) => ({ ...prev, [key]: null }));
+      return;
+    }
+    locationApi
+      .resolve({ callNumber: value })
+      .then((hint) => {
+        setCopyHints((prev) => ({ ...prev, [key]: hint }));
+        if (hint && hint.mapped && hint.pillar != null) {
+          const pillar = Number(hint.pillar);
+          const target = shelves.find((s) => (pillarByShelfId[s.id] || []).includes(pillar))?.id;
+          if (target && (!copyShelfId || copyShelfId === autoShelfId.current)) {
+            updateCopy(key, 'shelfId', target);
+            autoShelfId.current = target;
+          }
+        }
+      })
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    if (editing) return;
+    if (!recommendedShelfId) return;
+    const prevAuto = autoShelfId.current;
+    const shouldReplace = !selectedShelf || selectedShelf === prevAuto;
+    if (shouldReplace) {
+      setSelectedShelf(recommendedShelfId);
+      autoShelfId.current = recommendedShelfId;
+      setCopies((prev) =>
+        prev.map((c) =>
+          !c.shelfId || c.shelfId === prevAuto ? { ...c, shelfId: recommendedShelfId } : c
+        )
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recommendedShelfId, editing]);
+
   useEffect(() => {
     libraryApi
       .tree()
       .then((data) => setStructure(Array.isArray(data) ? data : []))
       .catch(() => setStructure([]));
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    locationApi
+      .categories()
+      .then((list) => {
+        if (!mounted || !Array.isArray(list)) return;
+        const guides = {};
+        list.forEach((g) => { guides[String(g.category || '').toUpperCase()] = g; });
+        setCategoryGuides(guides);
+      })
+      .catch(() => {});
+    return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
@@ -253,6 +337,16 @@ const AddBook = ({ basePath = '/librarian' }) => {
     const reader = new FileReader();
     reader.onload = (event) => setCoverPreview(event.target.result);
     reader.readAsDataURL(file);
+  };
+
+  const handleRemoveCover = (e) => {
+    e.stopPropagation();
+    setCoverFile(null);
+    setCoverImage(null);
+    setCoverPreview(null);
+    const input = document.getElementById('cover-input');
+    if (input) input.value = '';
+    toast('Cover removed', 'success');
   };
 
   const loadExample = () => {
@@ -627,12 +721,65 @@ const AddBook = ({ basePath = '/librarian' }) => {
             Book Location
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-            Pick the exact shelf. The library, floor, section and rack are derived from the library structure.
+            Based on the {form.category || 'category'} selected, the closest matching shelf is suggested automatically.
+            You can still pick any shelf manually.
           </p>
+
+          {(guideForCategory(form.category) || {}).mapped ? (
+            <div
+              style={{
+                padding: '0.9rem 1.1rem',
+                marginBottom: '1rem',
+                background: 'var(--surface)',
+                border: '1px solid var(--primary)',
+                borderLeft: '4px solid var(--primary)',
+                borderRadius: '10px',
+                fontSize: '0.92rem',
+                color: 'var(--text)',
+              }}
+            >
+              <div style={{ fontWeight: 600, color: 'var(--primary)', marginBottom: '0.3rem' }}>
+                <Milestone size={15} style={{ verticalAlign: '-2px', marginRight: '0.35rem' }} />
+                Pillar Location Guide
+              </div>
+              <p style={{ margin: 0 }}>{guideForCategory(form.category).text}</p>
+              {recommendedShelfId ? (
+                <p style={{ margin: '0.4rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                  Suggested shelf: <strong>{shelfOptions.find((o) => o.value === recommendedShelfId)?.label}</strong>
+                </p>
+              ) : (
+                <p style={{ margin: '0.4rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                  No shelf in the library structure is tagged for Pillar {guideForCategory(form.category).pillar} yet.
+                  Please select one manually or add it in Library Structure.
+                </p>
+              )}
+            </div>
+          ) : (
+            guideForCategory(form.category) && (
+              <div
+                style={{
+                  padding: '0.9rem 1.1rem',
+                  marginBottom: '1rem',
+                  background: 'var(--surface)',
+                  border: '1px dashed var(--border)',
+                  borderLeft: '4px solid var(--warning)',
+                  borderRadius: '10px',
+                  fontSize: '0.92rem',
+                  color: 'var(--text-secondary)',
+                }}
+              >
+                {guideForCategory(form.category).text}
+              </div>
+            )
+          )}
+
           <Select
             label="Shelf Location"
             value={selectedShelf}
-            onChange={(e) => setSelectedShelf(e.target.value)}
+            onChange={(e) => {
+              autoShelfId.current = null;
+              setSelectedShelf(e.target.value);
+            }}
             placeholder="Select a shelf"
           >
             <option value="">Select a shelf</option>
@@ -707,8 +854,19 @@ const AddBook = ({ basePath = '/librarian' }) => {
                     <Input
                       value={copy.callNumber}
                       onChange={(e) => updateCopy(copy._key, 'callNumber', e.target.value)}
+                      onBlur={() => resolveCallNumber(copy._key, copy.callNumber, copy.shelfId)}
                       placeholder="e.g. TP 370 .T65 2000"
                     />
+                    {copyHints[copy._key]?.mapped && (
+                      <p style={{ margin: '0.35rem 0 0', fontSize: '0.8rem', color: 'var(--primary)' }}>
+                        {copyHints[copy._key].text}
+                      </p>
+                    )}
+                    {copyHints[copy._key] && !copyHints[copy._key].mapped && (
+                      <p style={{ margin: '0.35rem 0 0', fontSize: '0.8rem', color: 'var(--warning)' }}>
+                        {copyHints[copy._key].text}
+                      </p>
+                    )}
                   </div>
                   <div className="form-group">
                     <label>Copy Number</label>
@@ -741,7 +899,10 @@ const AddBook = ({ basePath = '/librarian' }) => {
                     <label>Shelf Location</label>
                     <Select
                       value={copy.shelfId}
-                      onChange={(e) => updateCopy(copy._key, 'shelfId', e.target.value)}
+                      onChange={(e) => {
+                        autoShelfId.current = null;
+                        updateCopy(copy._key, 'shelfId', e.target.value);
+                      }}
                       placeholder="Select shelf"
                     >
                       <option value="">Use book location</option>
@@ -827,6 +988,10 @@ const AddBook = ({ basePath = '/librarian' }) => {
             <Upload size={18} style={{ color: 'var(--primary)' }} />
             Book Cover
           </h2>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+            This photo is shown in search results, book details and the step-by-step location guide. It is uploaded to
+            the cloud and saved on the book record.
+          </p>
           <div className="upload-area" onClick={() => document.getElementById('cover-input').click()}>
             {coverPreview ? (
               <img src={coverPreview} alt="Cover Preview" style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '8px' }} />
@@ -840,6 +1005,27 @@ const AddBook = ({ basePath = '/librarian' }) => {
                   PNG, JPG, or GIF (max. 8MB)
                 </p>
               </>
+            )}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+            {coverFile ? (
+              <Badge variant="warning">
+                New photo selected - uploads when you save
+              </Badge>
+            ) : coverImage ? (
+              <Badge variant="success">
+                Photo uploaded and saved
+              </Badge>
+            ) : (
+              <Badge variant="info">
+                No photo yet
+              </Badge>
+            )}
+            {(coverFile || coverImage) && (
+              <Button variant="outline" type="button" onClick={handleRemoveCover}>
+                <Trash2 size={16} />
+                Remove Cover
+              </Button>
             )}
           </div>
           <input

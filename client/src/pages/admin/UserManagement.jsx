@@ -1,68 +1,75 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, User, Shield, ShieldOff } from 'lucide-react';
 import { Input, Select, Badge } from '../../components/common';
 import { useAudit } from '../../context/useAudit';
+import { adminApi } from '../../services/admin';
 import './Admin.css';
 
-const initialUsers = [
-  { id: 1, name: 'John Doe', email: 'john.doe@absu.edu.ng', matric: '2022/131001/regular', role: 'student', status: 'active' },
-  { id: 2, name: 'Sarah Johnson', email: 'sarah.johnson@absu.edu.ng', matric: '2022/131014/regular', role: 'student', status: 'active' },
-  { id: 3, name: 'Library Admin', email: 'admin@absu.edu.ng', matric: 'STAFF-001', role: 'librarian', status: 'active' },
-  { id: 4, name: 'Michael Brown', email: 'michael.brown@absu.edu.ng', matric: '2021/131078/regular', role: 'student', status: 'suspended' },
-  { id: 5, name: 'Grace Manager', email: 'grace@absu.edu.ng', matric: 'STAFF-002', role: 'admin', status: 'active' }
-];
-
 const UserManagement = () => {
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { audit } = useAudit();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = search === '' ||
-      user.name.toLowerCase().includes(search.toLowerCase()) ||
-      user.email.toLowerCase().includes(search.toLowerCase()) ||
-      user.matric.includes(search);
-    const matchesRole = roleFilter === 'All' || user.role === roleFilter;
-    const matchesStatus = statusFilter === 'All' || user.status === statusFilter;
-    return matchesSearch && matchesRole && matchesStatus;
-  });
+  useEffect(() => {
+    fetchUsers();
+  }, [search, roleFilter, statusFilter]);
 
-  const toggleUserStatus = (id) => {
-    const target = users.find(user => user.id === id);
-    const nextStatus = target?.status === 'active' ? 'suspended' : 'active';
-    setUsers(prev => prev.map(user => 
-      user.id === id ? { ...user, status: nextStatus } : user
-    ));
-    audit('Update', 'User', `${nextStatus === 'active' ? 'Reactivated' : 'Suspended'} ${target?.name || `user ${id}`} (${nextStatus})`);
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const params = { limit: 100 };
+      if (search) params.search = search;
+      if (roleFilter !== 'All') params.role = roleFilter.toLowerCase();
+      if (statusFilter !== 'All') params.status = statusFilter.toLowerCase();
+      const data = await adminApi.users(params);
+      setUsers(data.items || []);
+    } catch (err) {
+      console.error('Failed to load users:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleUserStatus = async (user) => {
+    try {
+      const nextStatus = user.isActive === false ? true : false;
+      await adminApi.updateUser(user.id, { isActive: nextStatus });
+      setUsers(prev => prev.map(u =>
+        u.id === user.id ? { ...u, isActive: nextStatus } : u
+      ));
+      audit('Update', 'User', `${nextStatus ? 'Activated' : 'Deactivated'} ${user.first_name} ${user.last_name}`);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
     <div className="admin-page">
       <div className="page-header">
         <h1>User Management</h1>
-        <p>Manage all system users.</p>
+        <p>Manage administrators and librarians.</p>
       </div>
 
       <div className="toolbar">
         <div className="toolbar-left">
           <Input
-            placeholder="Search by name, email, or matric number..."
+            placeholder="Search by name or email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             icon={Search}
           />
           <Select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
             <option value="All">All Roles</option>
-            <option value="student">Student</option>
-            <option value="librarian">Librarian</option>
             <option value="admin">Admin</option>
+            <option value="librarian">Librarian</option>
           </Select>
           <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="All">All Status</option>
             <option value="active">Active</option>
-            <option value="suspended">Suspended</option>
+            <option value="inactive">Inactive</option>
           </Select>
         </div>
       </div>
@@ -73,46 +80,45 @@ const UserManagement = () => {
             <thead>
               <tr>
                 <th>User</th>
-                <th>Matric / Staff ID</th>
                 <th>Role</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map(user => (
+              {loading ? (
+                <tr><td colSpan="4" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>Loading...</td></tr>
+              ) : users.length === 0 ? (
+                <tr><td colSpan="4" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>No users found.</td></tr>
+              ) : users.map(user => (
                 <tr key={user.id}>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       <div style={{ width: 40, height: 40, background: 'var(--primary-light)', color: 'var(--primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>
-                        {user.name.charAt(0)}
+                        {(user.first_name || '?').charAt(0)}
                       </div>
                       <div>
-                        <strong style={{ color: 'var(--text)' }}>{user.name}</strong>
+                        <strong style={{ color: 'var(--text)' }}>{user.first_name} {user.last_name}</strong>
                         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
                           {user.email}
                         </p>
                       </div>
                     </div>
                   </td>
-                  <td>{user.matric}</td>
                   <td>
-                    <Badge variant={user.role === 'admin' ? 'danger' : user.role === 'librarian' ? 'warning' : 'info'}>
-                      {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                    <Badge variant={user.role === 'admin' ? 'danger' : 'warning'}>
+                      {user.role === 'admin' ? 'Administrator' : 'Librarian'}
                     </Badge>
                   </td>
                   <td>
-                    <Badge variant={user.status === 'active' ? 'success' : 'danger'}>
-                      {user.status === 'active' ? 'Active' : 'Suspended'}
+                    <Badge variant={user.isActive !== false ? 'success' : 'danger'}>
+                      {user.isActive !== false ? 'Active' : 'Inactive'}
                     </Badge>
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button className="switch-btn" onClick={() => toggleUserStatus(user.id)} title={user.status === 'active' ? 'Suspend User' : 'Activate User'}>
-                        {user.status === 'active' ? <ShieldOff size={16} /> : <Shield size={16} />}
-                      </button>
-                      <button className="action-btn" title="View">
-                        <User size={16} />
+                      <button className="switch-btn" onClick={() => toggleUserStatus(user)} title={user.isActive !== false ? 'Deactivate' : 'Activate'}>
+                        {user.isActive !== false ? <ShieldOff size={16} /> : <Shield size={16} />}
                       </button>
                     </div>
                   </td>

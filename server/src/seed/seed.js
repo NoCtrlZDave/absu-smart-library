@@ -4,8 +4,6 @@ import mongoose from 'mongoose';
 import User from '../models/User.js';
 import Book from '../models/Book.js';
 import StructureNode from '../models/StructureNode.js';
-import Borrowing from '../models/Borrowing.js';
-import Reservation from '../models/Reservation.js';
 import InventoryLog from '../models/InventoryLog.js';
 import AuditLog from '../models/AuditLog.js';
 import Setting from '../models/Setting.js';
@@ -97,90 +95,66 @@ const seedUsers = async () => {
     role: 'librarian',
     phone: '08087654321',
   });
-  const students = await User.create([
-    {
-      first_name: 'Adaeze', last_name: 'Uche',
-      email: 'student@absu.edu.ng', password: 'student123', role: 'student',
-      matric_number: '2021/131178/regular', department: 'Computer Science', level: '400', phone: '08011223344',
-      mustChangePassword: true,
-    },
-    {
-      first_name: 'Emeka', last_name: 'Okonkwo',
-      email: 'emeka@absu.edu.ng', password: 'student123', role: 'student',
-      matric_number: '2022/134001/regular', department: 'Engineering', level: '300', phone: '08099887766',
-      mustChangePassword: true,
-    },
-    {
-      first_name: 'Amina', last_name: 'Yusuf',
-      email: 'amina@absu.edu.ng', password: 'student123', role: 'student',
-      matric_number: '2021/131450/regular', department: 'Medicine', level: '400', phone: '08055443322',
-      mustChangePassword: true,
-    },
-  ]);
 
-  const pendingStaff = await User.create({
-    first_name: 'Dr. Kelechi',
-    last_name: 'Eze',
-    email: 'staff.pending@absu.edu.ng',
-    password: 'staff123',
-    role: 'staff',
-    staffType: 'teaching',
-    verificationStatus: 'pending',
-    isActive: true,
-    title: 'Dr.',
-    staffNumber: 'ABSU/STAFF/0042',
-    department: 'Food Science & Technology',
-    faculty: 'College of Physical Sciences',
-    phone: '08066778899',
-  });
+  return { admin, librarian };
+};
 
-  const verifiedStaff = await User.create({
-    first_name: 'Chidi',
-    last_name: 'Nnamdi',
-    email: 'staff.verified@absu.edu.ng',
-    password: 'staff123',
-    role: 'staff',
-    staffType: 'non-teaching',
-    verificationStatus: 'verified',
-    isActive: true,
-    department: 'Library Administration',
-    phone: '08012344321',
-  });
-
-  return { admin, librarian, students, pendingStaff, verifiedStaff };
+const STRUCTURE = {
+  sections: [
+    { name: 'Computer Science', pillars: [10] },
+    { name: 'Engineering', pillars: [12, 13] },
+    { name: 'Medicine', pillars: [9] },
+    { name: 'Law', pillars: [] },
+    { name: 'Business', pillars: [4, 5] },
+    { name: 'Education', pillars: [7] },
+    { name: 'Physics', pillars: [10] },
+    { name: 'Chemistry', pillars: [11] },
+    { name: 'Mathematics', pillars: [9] },
+    { name: 'Social Sciences', pillars: [2, 5] },
+    { name: 'Arts & Humanities', pillars: [7, 1] },
+    { name: 'Agriculture', pillars: [11] },
+  ],
 };
 
 const seedStructure = async () => {
   await StructureNode.deleteMany({});
   const library = await StructureNode.create({ type: 'library', name: 'ABSU Main Library', code: 'MAIN' });
-  const floor1 = await StructureNode.create({ type: 'floor', name: 'Floor 1', code: 'F01', parent: library._id });
-  const floor2 = await StructureNode.create({ type: 'floor', name: 'Floor 2', code: 'F02', parent: library._id });
-  const floor3 = await StructureNode.create({ type: 'floor', name: 'Floor 3', code: 'F03', parent: library._id });
-  const floor4 = await StructureNode.create({ type: 'floor', name: 'Floor 4', code: 'F04', parent: library._id });
-  const floor5 = await StructureNode.create({ type: 'floor', name: 'Floor 5', code: 'F05', parent: library._id });
-
-  const sections = [
-    ['Business', floor1._id], ['Education', floor1._id], ['Social Sciences', floor1._id],
-    ['Engineering', floor2._id], ['Law', floor2._id], ['Arts & Humanities', floor2._id],
-    ['Computer Science', floor3._id], ['Medicine', floor4._id], ['Chemistry', floor5._id],
-    ['Physics', floor5._id], ['Mathematics', floor5._id], ['Agriculture', floor5._id],
-  ];
+  const floor1 = await StructureNode.create({ type: 'floor', name: 'Floor 1', code: 'F01', parent: library._id, pillars: [1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13] });
 
   const sectionNodes = {};
-  for (const [name, parent] of sections) {
-    const sec = await StructureNode.create({ type: 'section', name, code: name.slice(0, 3).toUpperCase(), parent });
-    sectionNodes[name] = sec;
-    for (let r = 1; r <= 3; r += 1) {
-      const rack = await StructureNode.create({ type: 'rack', name: `Rack ${name.slice(0, 2).toUpperCase()}${r}`, code: `R${r}`, parent: sec._id });
+  for (const section of STRUCTURE.sections) {
+    const sec = await StructureNode.create({
+      type: 'section',
+      name: section.name,
+      code: section.name.slice(0, 3).toUpperCase(),
+      parent: floor1._id,
+      pillars: section.pillars,
+    });
+    sectionNodes[section.name] = sec;
+    for (let r = 1; r <= 2; r += 1) {
+      const rack = await StructureNode.create({
+        type: 'rack',
+        name: `Rack ${sec.code}${r}`,
+        code: `R${r}`,
+        parent: sec._id,
+        pillars: section.pillars,
+      });
       for (let s = 1; s <= 3; s += 1) {
-        await StructureNode.create({ type: 'shelf', name: `Shelf ${s}`, code: `S${s}`, parent: rack._id, capacity: 50 });
+        await StructureNode.create({
+          type: 'shelf',
+          name: `Shelf ${s}`,
+          code: `S${s}`,
+          parent: rack._id,
+          capacity: 50,
+          pillars: section.pillars,
+        });
       }
     }
   }
   return { library, sections: sectionNodes };
 };
 
-const seedBooks = async (users) => {
+const seedBooks = async () => {
   await Book.deleteMany({});
 
   const docs = [];
@@ -191,40 +165,10 @@ const seedBooks = async (users) => {
 
   const books = await Book.create(docs);
 
-  // Create one sample borrowing + reservation so dashboards are not empty
-  const [activeBook] = books;
-  const borrowedCopy = (activeBook.copies || []).find((c) => c.status !== 'available') || activeBook.copies[0];
-  const student = users.students[0];
-
-  const borrow = await Borrowing.create({
-    student: student._id,
-    book: activeBook._id,
-    bookTitle: activeBook.title,
-    copyCode: borrowedCopy?.code,
-    borrowDate: new Date(Date.now() - 5 * 86400000),
-    dueDate: new Date(Date.now() + 9 * 86400000),
-  });
-
-  if (borrowedCopy) {
-    await Book.updateOne(
-      { _id: activeBook._id, 'copies.code': borrowedCopy.code },
-      { $set: { 'copies.$.status': 'borrowed', 'copies.$.borrower': `${student.first_name} ${student.last_name}`, 'copies.$.dueDate': borrow.dueDate.toISOString().slice(0, 10) } }
-    );
-  }
-
-  await Reservation.create({
-    student: users.students[1]._id,
-    book: books[1]._id,
-    bookTitle: books[1].title,
-    status: 'pending',
-  });
-
   return books;
 };
 
 const seedMisc = async (users) => {
-  await Borrowing.deleteMany({});
-  await Reservation.deleteMany({});
   await InventoryLog.deleteMany({});
   await AuditLog.deleteMany({});
   await Setting.deleteMany({});
@@ -237,8 +181,6 @@ const seedMisc = async (users) => {
 
   await Setting.create([
     { key: 'library.name', label: 'Library Name', value: 'ABSU Main Library', category: 'library' },
-    { key: 'library.loan_days', label: 'Default Loan Days', value: 14, category: 'circulation' },
-    { key: 'library.max_reserve_days', label: 'Reservation Hold Days', value: 3, category: 'circulation' },
   ]);
 
   await AuditLog.create({
@@ -260,18 +202,13 @@ const seed = async () => {
     const users = await seedUsers();
     console.log('Seeding library structure...');
     await seedStructure();
-    console.log('Seeding circulation/misc data...');
-    await seedMisc(users);
     console.log('Seeding catalogue...');
-    await seedBooks(users);
+    await seedBooks();
 
     console.log('Seeding complete.');
     console.log('------------------------------------');
     console.log('Admin account:    admin@absu.edu.ng / admin123');
     console.log('Librarian account: librarian@absu.edu.ng / lib123');
-    console.log('Student account:  student@absu.edu.ng / student123 (matric 2021/131178/regular, change on first login)');
-    console.log('Staff pending:     staff.pending@absu.edu.ng / staff123 (verify under Admin -> Staff Verification)');
-    console.log('Staff verified:    staff.verified@absu.edu.ng / staff123');
     await mongoose.disconnect();
   } catch (err) {
     console.error('Seed failed:', err);

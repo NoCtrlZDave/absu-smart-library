@@ -1,34 +1,74 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BookOpen, CheckCircle, AlertCircle, MapPin, ShieldAlert, Search, Download } from 'lucide-react';
 import { Button, Input } from '../../components/common';
 import { useToast } from '../../components/common/useToast';
 import { exportSheet, toFileSafe } from '../../utils/export';
+import { inventoryApi } from '../../services/inventory';
 import './Librarian.css';
 
-const stats = [
-  { title: 'Total Books', value: '5,240', icon: <BookOpen size={24} />, color: 'primary' },
-  { title: 'Verified', value: '5,185', icon: <CheckCircle size={24} />, color: 'success' },
-  { title: 'Missing', value: '12', icon: <AlertCircle size={24} />, color: 'danger' },
-  { title: 'Misplaced', value: '8', icon: <MapPin size={24} />, color: 'warning' },
-  { title: 'Damaged', value: '35', icon: <ShieldAlert size={24} />, color: 'danger' }
-];
+const badgeFor = (status) => {
+  const map = {
+    verified: 'badge-success',
+    found: 'badge-success',
+    scan: 'badge-info',
+    missing: 'badge-danger',
+    misplaced: 'badge-warning',
+    damaged: 'badge-warning',
+  };
+  return `badge ${map[status] || 'badge-info'}`;
+};
 
-const inventoryItems = [
-  { id: 1, book: 'Introduction to Algorithms', copyId: 'CS-001', status: 'verified', location: 'Floor 3, Rack 2' },
-  { id: 2, book: 'Engineering Mathematics', copyId: 'EN-003', status: 'verified', location: 'Floor 2, Rack 1' },
-  { id: 3, book: 'Principles of Anatomy', copyId: 'ME-002', status: 'misplaced', expected: 'Floor 1, Section C', actual: 'Floor 3, Section A' },
-  { id: 4, book: 'Constitutional Law', copyId: 'LW-001', status: 'missing' },
-  { id: 5, book: 'Organic Chemistry', copyId: 'CH-001', status: 'damaged', location: 'Floor 2, Rack 3' },
-  { id: 6, book: 'Database System Concepts', copyId: 'DB-001', status: 'verified', location: 'Floor 3, Section B' },
-  { id: 7, book: 'Software Engineering', copyId: 'CS-010', status: 'missing' },
-  { id: 8, book: 'Business Ethics', copyId: 'BS-004', status: 'verified', location: 'Floor 4, Rack 1' }
-];
+const format = (n) => (n == null ? '0' : Number(n).toLocaleString());
+
+const toRows = (logs) =>
+  (logs || []).map((l) => ({
+    id: l.id,
+    book: l.bookTitle || 'Unknown book',
+    copyId: l.copyCode || '-',
+    status: l.type || l.status || 'scan',
+    expected: l.expectedLocation || null,
+    actual: l.detectedLocation || null,
+  }));
 
 const Inventory = () => {
   const showToast = useToast();
   const [search, setSearch] = useState('');
+  const [stats, setStats] = useState(null);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredItems = inventoryItems.filter((item) => {
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        const [statsRes, logsRes] = await Promise.all([
+          inventoryApi.stats(),
+          inventoryApi.logs({ limit: 200 }),
+        ]);
+        if (!mounted) return;
+        setStats(statsRes);
+        setItems(toRows(logsRes?.items));
+      } catch (err) {
+        showToast(err.message || 'Failed to load inventory.', 'error');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    load();
+    return () => { mounted = false; };
+  }, []);
+
+  const statCards = stats
+    ? [
+        { title: 'Total Books', value: format(stats.total_books), icon: <BookOpen size={24} />, color: 'primary' },
+        { title: 'Verified', value: format(stats.verified), icon: <CheckCircle size={24} />, color: 'success' },
+        { title: 'Missing', value: format(stats.missing), icon: <AlertCircle size={24} />, color: 'danger' },
+        { title: 'Misplaced', value: format(stats.misplaced), icon: <MapPin size={24} />, color: 'warning' },
+        { title: 'Damaged', value: format(stats.damaged), icon: <ShieldAlert size={24} />, color: 'danger' },
+      ]
+    : [];
+
+  const filteredItems = items.filter((item) => {
     const q = search.toLowerCase();
     if (!q) return true;
     return (
@@ -47,7 +87,9 @@ const Inventory = () => {
       'Book': item.book,
       'Copy ID': item.copyId,
       'Status': item.status.charAt(0).toUpperCase() + item.status.slice(1),
-      'Location': item.location || (item.status === 'misplaced' ? `Expected: ${item.expected} / Detected: ${item.actual}` : 'Unknown'),
+      'Location': item.status === 'misplaced'
+        ? `Expected: ${item.expected || 'Unknown'} / Detected: ${item.actual || 'Unknown'}`
+        : (item.actual || item.expected || 'Unknown'),
     }));
     const ok = exportSheet(rows, `ABSU-Inventory-${toFileSafe(new Date().toISOString().slice(0, 10))}.xlsx`);
     if (ok) showToast('Inventory exported as XLSX.', 'success');
@@ -61,7 +103,7 @@ const Inventory = () => {
       </div>
 
       <div className="stats-grid">
-        {stats.map((stat, index) => (
+        {statCards.map((stat, index) => (
           <div key={index} className="stat-card">
             <div className={`stat-icon ${stat.color}`}>{stat.icon}</div>
             <div className="stat-content">
@@ -101,16 +143,24 @@ const Inventory = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredItems.map(item => (
+              {loading ? (
+                <tr>
+                  <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                    Loading inventory...
+                  </td>
+                </tr>
+              ) : !filteredItems.length ? (
+                <tr>
+                  <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                    No inventory activity found.
+                  </td>
+                </tr>
+              ) : filteredItems.map(item => (
                 <tr key={item.id}>
                   <td><strong>{item.book}</strong></td>
                   <td>{item.copyId}</td>
                   <td>
-                    <span className={`badge ${
-                      item.status === 'verified' ? 'badge-success' :
-                      item.status === 'missing' ? 'badge-danger' :
-                      item.status === 'damaged' ? 'badge-warning' : 'badge-info'
-                    }`}>
+                    <span className={badgeFor(item.status)}>
                       {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
                     </span>
                   </td>
@@ -118,13 +168,13 @@ const Inventory = () => {
                     {item.status === 'misplaced' ? (
                       <div style={{ fontSize: '0.85rem' }}>
                         <div style={{ color: 'var(--text-secondary)' }}>
-                          Expected: {item.expected}
+                          Expected: {item.expected || 'Unknown'}
                         </div>
                         <div style={{ color: 'var(--warning)' }}>
-                          Detected: {item.actual}
+                          Detected: {item.actual || 'Unknown'}
                         </div>
                       </div>
-                    ) : item.location || <span style={{ color: 'var(--danger)' }}>Unknown</span>}
+                    ) : item.actual || item.expected || <span style={{ color: 'var(--danger)' }}>Unknown</span>}
                   </td>
                 </tr>
               ))}

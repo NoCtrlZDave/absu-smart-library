@@ -35,27 +35,43 @@ const Home = () => {
     <div className="home-page">
       <section className="hero-section">
         <div className="hero-content">
-          <h1>ABSU Smart Library</h1>
-          <p>Access thousands of books, journals, and academic resources at your fingertips</p>
+          <span className="hero-eyebrow">Abia State University · Smart Library</span>
+          <h1>
+            Find any book.
+            <br />
+            <span className="hero-title-accent">Pin its exact shelf.</span>
+          </h1>
+          <p>
+            Search by title, author or ISBN — then walk straight to the pillar,
+            rack and shelf. No login required.
+          </p>
           <form className="hero-search" onSubmit={handleSearch}>
+            <Search size={20} className="hero-search-icon" aria-hidden="true" />
             <input
               type="text"
               placeholder="Search by title, author, ISBN, or keyword..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <button type="submit">
-              <Search size={20} />
-              Search
-            </button>
+            <button type="submit">Search</button>
           </form>
+          <div className="hero-chips">
+            <span className="hero-chips-label">Popular:</span>
+            <Link to="/search?category=Engineering">Engineering</Link>
+            <Link to="/search?category=Computer Science">Computer Science</Link>
+            <Link to="/search?category=Law">Law</Link>
+            <Link to="/search" className="hero-chips-more">Browse all</Link>
+          </div>
         </div>
+        <div className="hero-orb hero-orb--gold" aria-hidden="true" />
+        <div className="hero-orb hero-orb--navy" aria-hidden="true" />
       </section>
 
       <section className="section">
         <div className="section-title">
-          <h2>Browse by Category</h2>
-          <p>Explore our extensive collection across various disciplines</p>
+          <span className="section-eyebrow">Browse disciplines</span>
+          <h2>Explore by Category</h2>
+          <p>From Engineering to Law — our collection spans every faculty</p>
         </div>
         <div className="categories-grid">
           {HOME_CATEGORIES.map((category, index) => (
@@ -63,15 +79,17 @@ const Home = () => {
               <div className="category-icon">{category.icon}</div>
               <h3>{category.name}</h3>
               <p>{categoryCount(category.name)} books</p>
+              <span className="category-card__arrow" aria-hidden="true">→</span>
             </Link>
           ))}
         </div>
       </section>
 
-      <section className="section" style={{ background: 'var(--background)' }}>
+      <section className="section section--alt">
         <div className="section-title">
+          <span className="section-eyebrow">Hand-picked reads</span>
           <h2>Featured Books</h2>
-          <p>Popular and recently added books in our collection</p>
+          <p>Popular and recently added titles in our collection</p>
         </div>
         <div className="books-grid">
           {featuredBooks.map((book) => (
@@ -81,7 +99,7 @@ const Home = () => {
                 <h3>{book.title}</h3>
                 <p>{book.author}</p>
                 <div className="book-meta">
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{book.year}</span>
+                  <span className="book-year">{book.year}</span>
                   <span className={`badge ${book.available ? 'badge-success' : 'badge-danger'}`}>
                     {book.available ? 'Available' : 'Borrowed'}
                   </span>
@@ -94,29 +112,30 @@ const Home = () => {
 
       <section className="section">
         <div className="section-title">
+          <span className="section-eyebrow">Simple workflow</span>
           <h2>How It Works</h2>
-          <p>Simple steps to access library resources</p>
+          <p>Three steps between you and the book you need</p>
         </div>
         <div className="steps-grid">
           <div className="step-card">
             <div className="step-number">1</div>
             <h3>Search & Discover</h3>
-            <p>Use our smart search to find books by title, author, ISBN, or browse by category. Check real-time availability.</p>
+            <p>Use our smart search to find books by title, author, ISBN, or browse by category.</p>
           </div>
           <div className="step-card">
             <div className="step-number">2</div>
-            <h3>Reserve Online</h3>
-            <p>Reserve books online before visiting. Get notified when your reserved book is ready for pickup.</p>
+            <h3>See the Exact Location</h3>
+            <p>Instantly see the exact floor, section, rack, and shelf of every book - no login required.</p>
           </div>
           <div className="step-card">
             <div className="step-number">3</div>
-            <h3>Locate & Borrow</h3>
-            <p>Find the exact location with our visual shelf guide. Scan and borrow in minutes.</p>
+            <h3>Walk In & Pick Up</h3>
+            <p>Head straight to the shelf and grab the book the moment you arrive.</p>
           </div>
         </div>
       </section>
 
-      <section className="section" style={{ background: 'var(--surface)' }}>
+      <section className="section section--flush">
         <div className="info-section">
           <div className="info-item">
             <h3>50,000+</h3>
@@ -124,15 +143,28 @@ const Home = () => {
           </div>
           <div className="info-item">
             <h3>10,000+</h3>
-            <p>Registered Students</p>
+            <p>Searchable Titles</p>
           </div>
           <div className="info-item">
             <h3>24/7</h3>
             <p>Online Access</p>
           </div>
           <div className="info-item">
-            <h3>5</h3>
-            <p>Floor Library</p>
+            <h3>13</h3>
+            <p>Physical Pillars</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="cta-band">
+          <div className="cta-band__text">
+            <h2>Ready to find your next read?</h2>
+            <p>Search the catalogue, grab your shelf reference, and be in and out in minutes.</p>
+          </div>
+          <div className="cta-band__actions">
+            <Link to="/search" className="cta-band__btn cta-band__btn--gold">Search the Catalogue</Link>
+            <Link to="/about" className="cta-band__btn cta-band__btn--ghost">Learn More</Link>
           </div>
         </div>
       </section>

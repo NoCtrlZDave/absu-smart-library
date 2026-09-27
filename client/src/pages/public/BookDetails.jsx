@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { MapPin, Calendar, Hash, Building, Tag, ArrowLeft, Bookmark, BookOpen, Layers, FileText, Stamp, List } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
+import { MapPin, Calendar, Hash, Building, Tag, ArrowLeft, BookOpen, Layers, FileText, Stamp, List, Milestone } from 'lucide-react';
 import { Button, Badge, BookCover } from '../../components/common';
 import { useBooks } from '../../context/useBook';
-import { useAuth } from '../../context/useAuth';
 import './Public.css';
 
 const makeLocationString = (book) => {
@@ -14,9 +13,7 @@ const makeLocationString = (book) => {
 
 const BookDetails = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { getBook } = useBooks();
-  const { user } = useAuth();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -32,14 +29,6 @@ const BookDetails = () => {
       mounted = false;
     };
   }, [id, getBook]);
-
-  const requireLogin = (nextPath) => {
-    if (user) {
-      navigate(nextPath);
-      return;
-    }
-    navigate(`/login?redirect=${encodeURIComponent(nextPath)}`);
-  };
 
   if (loading) {
     return (
@@ -85,7 +74,7 @@ const BookDetails = () => {
           <p className="book-author">by {book.author}</p>
 
           <Badge variant={book.available ? 'success' : 'danger'} style={{ marginBottom: '1.5rem' }}>
-            {book.available ? `${book.availableCopies} Copies Available` : 'All Copies Borrowed'}
+            {book.available ? `${book.availableCopies} Copies Available` : `${book.totalCopies} Copies`}
           </Badge>
 
           <div className="book-meta-grid">
@@ -239,6 +228,23 @@ const BookDetails = () => {
                     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0' }}>
                       {copy.locationString || makeLocationString(copy.location || book)}
                     </p>
+                    {copy.callNumber && (
+                      <p style={{ fontSize: '0.8rem', margin: '0.15rem 0 0' }}>
+                        <span style={{ fontWeight: 600 }}>Call No: </span>
+                        <code>{copy.callNumber}</code>
+                      </p>
+                    )}
+                    {copy.physicalLocation && (
+                      <p
+                        className={`physical-location-copy ${copy.physicalLocation.mapped ? '' : 'physical-location-copy--unmapped'}`}
+                        title={copy.physicalLocation.text}
+                      >
+                        <Milestone size={13} />
+                        {copy.physicalLocation.mapped
+                          ? `Pillar ${copy.physicalLocation.pillar} · ${copy.physicalLocation.subject}${copy.physicalLocation.arrow ? ` · ${copy.physicalLocation.arrow} side` : ''}`
+                          : copy.physicalLocation.text}
+                      </p>
+                    )}
                   </div>
                   <Badge variant={
                     copy.status === 'available' ? 'success' :
@@ -251,15 +257,34 @@ const BookDetails = () => {
             </div>
           </div>
 
+          {book.physicalLocation && (
+            <div className={`physical-location-card ${book.physicalLocation.mapped ? '' : 'physical-location-card--unmapped'}`}>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Milestone size={18} style={{ color: 'var(--primary)' }} />
+                Physical Location Guide
+              </h3>
+              <p style={{ color: 'var(--text)', fontSize: '1rem', lineHeight: 1.6, marginTop: '0.75rem' }}>
+                {book.physicalLocation.text}
+              </p>
+              {book.physicalLocation.mapped && (
+                <Link
+                  to={`/books/${book.id}/location`}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', marginTop: '0.75rem', textDecoration: 'none', fontWeight: 500 }}
+                >
+                  <MapPin size={16} />
+                  Get step-by-step directions
+                </Link>
+              )}
+            </div>
+          )}
+
           <div className="book-actions">
-            <Button variant="outline" onClick={() => requireLogin(`/books/${book.id}/location`)}>
-              <MapPin size={18} />
-              Locate Book
-            </Button>
-            <Button disabled={!book.available} onClick={() => user ? alert('Reservation feature coming soon.') : requireLogin(`/books/${book.id}`)}>
-              <Bookmark size={18} />
-              {user ? 'Reserve' : 'Reserve (Login to continue)'}
-            </Button>
+            <Link to={`/books/${book.id}/location`}>
+              <Button>
+                <MapPin size={18} />
+                See Exact Location
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
