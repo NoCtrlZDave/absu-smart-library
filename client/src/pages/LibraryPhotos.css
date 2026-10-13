@@ -15,6 +15,7 @@
   font-size: 0.9rem;
   color: var(--text-secondary);
   line-height: 1.5;
+  overflow-wrap: break-word;
 }
 
 .photos-note svg {
@@ -27,6 +28,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
   margin-bottom: 1.25rem;
 }
 
@@ -35,7 +37,7 @@
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-secondary);
-  background: var(--bg);
+  background: var(--surface-alt);
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 0.2rem 0.7rem;
@@ -43,22 +45,23 @@
 
 .photo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
   gap: 1.25rem;
 }
 
 .photo-slot {
-  background: var(--bg);
+  background: var(--surface-alt);
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .photo-slot__preview {
   position: relative;
-  height: 150px;
+  height: clamp(120px, 40vw, 150px);
   cursor: pointer;
   background: var(--surface);
   display: flex;
@@ -109,6 +112,7 @@
 .photo-slot__label {
   font-weight: 600;
   font-size: 0.95rem;
+  overflow-wrap: break-word;
 }
 
 .photo-slot__key {
@@ -117,10 +121,12 @@
   color: var(--text-secondary);
   opacity: 0.8;
   margin-top: -0.35rem;
+  overflow-wrap: anywhere;
 }
 
 .photo-slot__caption {
   width: 100%;
+  max-width: 100%;
   padding: 0.55rem 0.7rem;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -135,11 +141,20 @@
   border-color: var(--primary);
 }
 
+/* 16px floor keeps iOS Safari from zooming the page on focus */
+@media (pointer: coarse) {
+  .photo-slot__caption {
+    font-size: 1rem;
+    min-height: var(--tap-min);
+  }
+}
+
 .photo-slot__actions {
   display: flex;
   gap: 0.5rem;
   margin-top: auto;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .photo-slot__danger {
@@ -155,9 +170,11 @@
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
+  flex-wrap: wrap;
   margin-top: 1.5rem;
   font-size: 0.85rem;
   color: var(--text-secondary);
+  overflow-wrap: break-word;
 }
 
 .photos-footer svg {

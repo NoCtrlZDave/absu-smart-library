@@ -45,14 +45,17 @@ const Home = () => {
             Search by title, author or ISBN — then walk straight to the pillar,
             rack and shelf. No login required.
           </p>
-          <form className="hero-search" onSubmit={handleSearch}>
-            <Search size={20} className="hero-search-icon" aria-hidden="true" />
-            <input
-              type="text"
-              placeholder="Search by title, author, ISBN, or keyword..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <form className="hero-search" onSubmit={handleSearch} role="search">
+            <div className="hero-search__field">
+              <Search size={20} className="hero-search-icon" aria-hidden="true" />
+              <input
+                type="search"
+                aria-label="Search books by title, author, ISBN, or keyword"
+                placeholder="Search by title, author, ISBN..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
             <button type="submit">Search</button>
           </form>
           <div className="hero-chips">

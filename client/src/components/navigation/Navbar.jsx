@@ -9,6 +9,7 @@ function Navbar({ user = null, onLogout }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const location = useLocation();
   const dropdownRef = useRef(null);
+  const mobileToggleRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -18,6 +19,52 @@ function Navbar({ user = null, onLogout }) {
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Escape closes whichever menu is open and returns focus to the trigger.
+  useEffect(() => {
+    if (!mobileOpen && !dropdownOpen) return undefined;
+
+    function handleKeyDown(e) {
+      if (e.key !== 'Escape') return;
+      if (mobileOpen) {
+        setMobileOpen(false);
+        mobileToggleRef.current?.focus();
+      }
+      setDropdownOpen(false);
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [mobileOpen, dropdownOpen]);
+
+  // The panel is fixed with its own scroll area, so lock the page behind it
+  // to stop touch scrolling the backdrop while the menu is up.
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileOpen]);
+
+  // Navigating away (including browser back/forward) must not leave the
+  // panel open over the new page.
+  useEffect(() => {
+    setMobileOpen(false);
+    setDropdownOpen(false);
+  }, [location.pathname]);
+
+  // Close the panel if the viewport grows past the mobile breakpoint,
+  // otherwise it would stay stuck open on desktop with no toggle visible.
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 901px)');
+    function handleChange(e) {
+      if (e.matches) setMobileOpen(false);
+    }
+    mq.addEventListener('change', handleChange);
+    return () => mq.removeEventListener('change', handleChange);
   }, []);
 
   const closeMenus = () => {
@@ -86,6 +133,8 @@ function Navbar({ user = null, onLogout }) {
               <button
                 className="navbar__user-btn"
                 onClick={() => setDropdownOpen((prev) => !prev)}
+                aria-expanded={dropdownOpen}
+                aria-haspopup="true"
               >
                 <span className="navbar__user-avatar">
                   {getInitials(user)}
@@ -134,16 +183,23 @@ function Navbar({ user = null, onLogout }) {
           )}
 
           <button
+            ref={mobileToggleRef}
             className="navbar__mobile-toggle"
             onClick={() => setMobileOpen((prev) => !prev)}
-            aria-label="Toggle menu"
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileOpen}
+            aria-controls="navbar-mobile-menu"
           >
             {mobileOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </nav>
 
-      <div className={`navbar__mobile-menu ${mobileOpen ? 'navbar__mobile-menu--open' : ''}`}>
+      <div
+        id="navbar-mobile-menu"
+        className={`navbar__mobile-menu ${mobileOpen ? 'navbar__mobile-menu--open' : ''}`}
+        hidden={!mobileOpen}
+      >
         {links.map((link) => (
           <Link
             key={link.to}

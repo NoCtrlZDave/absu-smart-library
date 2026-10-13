@@ -4,6 +4,7 @@
 .layout-public,
 .layout-student {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -11,8 +12,10 @@
 .layout-public__main,
 .layout-student__main {
   flex: 1;
+  width: 100%;
   padding-top: var(--navbar-height);
   min-height: calc(100vh - var(--navbar-height));
+  min-height: calc(100dvh - var(--navbar-height));
 }
 
 .layout-public__footer,
@@ -20,7 +23,7 @@
   position: relative;
   background: linear-gradient(180deg, var(--primary) 0%, var(--brand-navy) 55%, var(--brand-navy) 100%);
   color: rgba(255, 255, 255, 0.78);
-  padding: 64px 24px 40px;
+  padding: clamp(2.5rem, 6vw, 4rem) var(--page-gutter) clamp(1.5rem, 4vw, 2.5rem);
 }
 
 .layout-public__footer::before,
@@ -35,17 +38,20 @@
 }
 
 .footer__inner {
-  max-width: 1200px;
+  max-width: var(--container-xl);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 40px;
+  /* min() guards the track floor so the footer can never force a page scrollbar */
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: clamp(1.5rem, 3vw, 2.5rem);
 }
 
 .footer__brand {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  grid-column: span 2;
+  min-width: 0;
 }
 
 .footer__brand-name {
@@ -57,6 +63,7 @@
   gap: 8px;
   font-family: var(--font-display);
   letter-spacing: -0.01em;
+  min-width: 0;
 }
 
 .footer__brand-logo {
@@ -72,6 +79,7 @@
   opacity: 0.65;
   line-height: 1.7;
   max-width: 360px;
+  overflow-wrap: break-word;
 }
 
 .footer__column-title {
@@ -88,6 +96,9 @@
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.72);
   padding: 5px 0;
+  /* Comfortable tap target without changing the visual rhythm */
+  min-height: 2rem;
+  overflow-wrap: break-word;
   transition: color var(--transition-fast), transform var(--transition-fast);
 }
 
@@ -97,37 +108,29 @@
 }
 
 .footer__bottom {
-  max-width: 1200px;
-  margin: 40px auto 0;
-  padding-top: 24px;
+  max-width: var(--container-xl);
+  margin: clamp(1.5rem, 4vw, 2.5rem) auto 0;
+  padding-top: clamp(1rem, 3vw, 1.5rem);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
   font-size: 0.8rem;
   opacity: 0.55;
 }
 
-@media (max-width: 768px) {
-  .footer__inner {
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-  }
-
+@media (max-width: 900px) {
   .footer__brand {
     grid-column: 1 / -1;
-  }
-
-  .footer__bottom {
-    flex-direction: column;
-    gap: 8px;
-    text-align: center;
   }
 }
 
 @media (max-width: 480px) {
-  .footer__inner {
-    grid-template-columns: 1fr;
+  .footer__bottom {
+    flex-direction: column;
+    text-align: center;
   }
 }
 
@@ -136,9 +139,12 @@
    ================================================ */
 .layout-admin {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
 }
 
+/* The sidebar is `position: fixed`, so this wrapper is only a spacer that
+   keeps the sidebar width in the flex flow. */
 .layout-admin__sidebar {
   width: var(--sidebar-width);
   flex-shrink: 0;
@@ -146,9 +152,12 @@
 
 .layout-admin__main {
   flex: 1;
+  /* Without this, wide tables/children push the whole shell sideways */
+  min-width: 0;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
   margin-left: var(--sidebar-width);
 }
 
@@ -156,12 +165,14 @@
   position: sticky;
   top: 0;
   height: var(--header-height);
+  min-height: var(--header-height);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  gap: var(--space-3);
+  padding: 0 var(--page-gutter);
   z-index: 100;
 }
 
@@ -169,11 +180,20 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  /* Must be allowed to shrink for the title to truncate */
+  min-width: 0;
+  flex: 1;
 }
 
 .layout-admin__toggle-btn {
   display: none;
-  padding: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  margin-left: calc(var(--tap-min) * -0.25);
+  padding: 0;
   border: none;
   background: none;
   color: var(--text);
@@ -186,20 +206,30 @@
 }
 
 .layout-admin__title {
-  font-size: 1.1rem;
+  font-size: clamp(1rem, 0.95rem + 0.3vw, 1.1rem);
   font-weight: 600;
   color: var(--text);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .layout-admin__header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .layout-admin__notif-btn {
   position: relative;
-  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
   border: none;
   background: none;
   color: var(--text-secondary);
@@ -212,10 +242,33 @@
   color: var(--text);
 }
 
+/* Logout: visible at every width (unlike the sidebar toggle, which is
+   desktop-hidden) */
+.layout-admin__header-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.layout-admin__header-icon-btn:hover {
+  background: var(--background);
+  color: var(--danger);
+}
+
 .layout-admin__notif-badge {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 8px;
+  right: 8px;
   width: 8px;
   height: 8px;
   background: var(--danger);
@@ -227,10 +280,12 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-height: var(--tap-min);
   padding: 4px 8px;
   border-radius: var(--radius-md);
   transition: background var(--transition-fast);
   cursor: pointer;
+  min-width: 0;
 }
 
 .layout-admin__header-user:hover {
@@ -240,6 +295,7 @@
 .layout-admin__header-avatar {
   width: 32px;
   height: 32px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: var(--primary);
   color: #fff;
@@ -250,21 +306,39 @@
   font-weight: 700;
 }
 
+.layout-admin__header-user-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
 .layout-admin__header-name {
   font-size: 0.85rem;
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 12ch;
 }
 
 .layout-admin__header-role {
   font-size: 0.7rem;
-  color: var(--muted);
+  color: var(--text-muted);
   text-transform: capitalize;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 14ch;
 }
 
 .layout-admin__content {
   flex: 1;
-  padding: 24px;
+  min-width: 0;
+  padding: var(--page-gutter);
   background: var(--background);
+  /* Nothing inside a page should ever scroll the page itself sideways */
+  overflow-x: clip;
 }
 
 /* ================================================
@@ -281,31 +355,8 @@
 }
 
 @media (max-width: 768px) {
-  .layout-admin__header {
-    padding: 0 16px;
-  }
-
-  .layout-admin__content {
-    padding: 16px;
-  }
-
   .layout-admin__header-name,
   .layout-admin__header-role {
     display: none;
-  }
-
-  .layout-admin__title {
-    font-size: 1rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .layout-admin__header-left {
-    min-width: 0;
-  }
-
-  .layout-admin__header-right {
-    flex-shrink: 0;
   }
 }

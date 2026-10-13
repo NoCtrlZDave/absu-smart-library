@@ -1,12 +1,12 @@
 /* Profile Page Styles */
 .student-page {
-  max-width: 1400px;
+  max-width: var(--page-max);
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--page-gutter);
 }
 
 .page-header {
-  margin-bottom: 2rem;
+  margin-bottom: var(--section-gap);
 }
 
 .page-header h1 {
@@ -22,53 +22,63 @@
 .profile-card {
   background: var(--surface);
   border-radius: 12px;
-  padding: 2rem;
+  padding: var(--card-pad);
   border: 1px solid var(--border);
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--section-gap);
 }
 
 .profile-header {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
+  gap: clamp(1rem, 4vw, 1.5rem);
+  margin-bottom: var(--section-gap);
+  padding-bottom: var(--section-gap);
   border-bottom: 1px solid var(--border);
+  min-width: 0;
 }
 
 .profile-avatar {
-  width: 80px;
-  height: 80px;
+  /* Shrinks on small phones so it never crowds out the name */
+  width: clamp(56px, 18vw, 80px);
+  height: clamp(56px, 18vw, 80px);
+  flex-shrink: 0;
   background: var(--primary);
   color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: clamp(1.4rem, 5vw, 2rem);
   font-weight: 700;
 }
 
+.profile-info {
+  min-width: 0;
+}
+
 .profile-info h2 {
-  font-size: 1.5rem;
+  font-size: clamp(1.25rem, 4.5vw, 1.5rem);
   color: var(--text);
   margin-bottom: 0.25rem;
+  overflow-wrap: break-word;
 }
 
 .profile-info p {
   color: var(--text-secondary);
+  overflow-wrap: break-word;
 }
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+  gap: var(--grid-gap);
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .form-group label {
@@ -84,13 +94,11 @@
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 500;
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
 
 @media (max-width: 768px) {
-  .student-page {
-    padding: 1rem;
-  }
-
   .profile-header {
     flex-direction: column;
     text-align: center;

@@ -19,20 +19,40 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* iOS: never let the layout exceed the viewport width */
+  overflow-x: hidden;
 }
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   line-height: 1.6;
+  /* Guards against any single un-expected child creating a page-level scrollbar */
+  overflow-x: clip;
 }
 
+/* --- Media never overflows its container, never distorts --- */
 img,
 picture,
 video,
 canvas,
-svg {
-  display: block;
+svg,
+iframe,
+embed,
+object {
   max-width: 100%;
+}
+
+img,
+video,
+canvas {
+  height: auto;
+}
+
+img,
+svg,
+video {
+  display: block;
 }
 
 input,
@@ -43,14 +63,39 @@ select {
   color: inherit;
 }
 
+/* Long dynamic content (titles, emails, URLs, codes) must never break layout */
 p,
 h1,
 h2,
 h3,
 h4,
 h5,
-h6 {
+h6,
+li,
+td,
+th,
+label,
+legend,
+figcaption,
+dt,
+dd {
   overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-wrap: balance;
+}
+
+/* Grid/flex children default to min-content width, which makes long content
+   blow the track out of the container. Opt every layout child into shrinking. */
+:where(.content-grid, .stats-grid, .form-grid, .footer__inner, .search-content,
+       .book-details-content, .location-path, .toolbar, .card, .stats-card) > * {
+  min-width: 0;
 }
 
 a {
@@ -221,7 +266,37 @@ table {
   --container-2xl: 1400px;
   --navbar-height: 4rem;
   --sidebar-width: 260px;
+  --header-height: 4rem;
+
+  /* --- Responsive scale ---
+     Every fluid value below is a clamp(): it interpolates smoothly between a
+     small-screen floor and a large-screen ceiling, so there are no abrupt
+     jumps at breakpoints and no value can ever exceed its container. */
+  --page-max: 1400px;
+  --page-gutter: clamp(1rem, 0.55rem + 2.2vw, 2rem);
+  --card-pad: clamp(1rem, 0.72rem + 1.3vw, 1.5rem);
+  --card-gap: clamp(1rem, 0.72rem + 1.3vw, 1.5rem);
+  --section-gap: clamp(2.5rem, 1.5rem + 5vw, 4rem);
+  --grid-gap: clamp(0.875rem, 0.55rem + 1.6vw, 1.5rem);
+  --section-pad-inline: clamp(1rem, 0.5rem + 2.5vw, 2rem);
+  --content-pad: var(--page-gutter);
+
+  /* Minimum comfortable touch target (WCAG 2.5.5 / platform HIG) */
+  --tap-min: 44px;
+
+  /* Card / control radii used by dashboard pages */
+  --radius-card: 12px;
+  --radius-control: 8px;
 }
+
+/* --- Breakpoint ladder (documentation only, kept in sync with the queries) ---
+   --bp-xs   360px   small phones
+   --bp-sm   480px   large phones
+   --bp-md   768px   tablets (portrait)
+   --bp-lg  1024px   tablets (landscape) / small laptops
+   --bp-xl  1200px   standard desktop
+   --bp-2xl 1400px   large desktop
+   --bp-3xl 1800px   ultrawide  */
 
 /* ============================================
    Global Styles
@@ -254,25 +329,25 @@ h6 {
 }
 
 h1 {
-  font-size: var(--text-5xl);
+  font-size: clamp(2rem, 1.35rem + 3vw, 3rem);
   letter-spacing: -0.03em;
 }
 
 h2 {
-  font-size: var(--text-3xl);
+  font-size: clamp(1.5rem, 1.16rem + 1.7vw, 1.875rem);
   letter-spacing: -0.025em;
 }
 
 h3 {
-  font-size: var(--text-2xl);
+  font-size: clamp(1.25rem, 1.09rem + 0.8vw, 1.5rem);
 }
 
 h4 {
-  font-size: var(--text-xl);
+  font-size: clamp(1.125rem, 1.06rem + 0.32vw, 1.25rem);
 }
 
 h5 {
-  font-size: var(--text-lg);
+  font-size: clamp(1rem, 0.97rem + 0.15vw, 1.125rem);
   font-weight: var(--font-semibold);
 }
 
@@ -371,11 +446,14 @@ hr {
 .gap-6 { gap: var(--space-6); }
 .gap-8 { gap: var(--space-8); }
 
-/* --- Grid --- */
+/* --- Grid ---
+   `minmax(0, 1fr)` rather than bare `1fr`: bare `1fr` implies an `auto`
+   minimum, which stops items shrinking below their min-content width and
+   lets long unbroken text push the track wider than the viewport. */
 .grid { display: grid; }
-.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .col-span-2 { grid-column: span 2; }
 .col-span-3 { grid-column: span 3; }
 .col-span-full { grid-column: 1 / -1; }
@@ -386,8 +464,8 @@ hr {
   max-width: var(--container-xl);
   margin-left: auto;
   margin-right: auto;
-  padding-left: var(--space-6);
-  padding-right: var(--space-6);
+  padding-left: var(--section-pad-inline);
+  padding-right: var(--section-pad-inline);
 }
 
 .container-sm {
@@ -654,15 +732,25 @@ hr {
   justify-content: center;
   gap: var(--space-2);
   padding: 0.625rem 1.25rem;
+  min-height: 2.25rem;
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
-  line-height: 1;
+  line-height: 1.2;
+  text-align: center;
   border: 1px solid transparent;
   border-radius: var(--radius-lg);
   cursor: pointer;
-  white-space: nowrap;
+  /* Never wider than the space available to it */
+  max-width: 100%;
+  /* Long dynamic labels wrap instead of pushing the layout sideways */
+  white-space: normal;
+  overflow-wrap: break-word;
   transition: all var(--transition-fast);
   user-select: none;
+}
+
+.btn > svg {
+  flex-shrink: 0;
 }
 
 .btn:active:not(:disabled) {
@@ -765,6 +853,7 @@ hr {
 .select,
 .textarea {
   width: 100%;
+  max-width: 100%;
   padding: 0.625rem 0.875rem;
   font-size: var(--text-sm);
   line-height: 1.5;
@@ -773,6 +862,17 @@ hr {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+/* Below 16px iOS/Safari zooms the viewport on focus, which breaks the
+   layout and traps the user. Coarse-pointer devices get a 16px floor. */
+@media (pointer: coarse) {
+  .input,
+  .select,
+  .textarea {
+    font-size: max(1rem, var(--text-sm));
+    min-height: var(--tap-min);
+  }
 }
 
 .input:focus,
@@ -845,7 +945,10 @@ hr {
 /* --- Table --- */
 .table-wrapper {
   width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
 }
@@ -874,6 +977,16 @@ hr {
   border-bottom: 1px solid var(--border-light);
   color: var(--text);
   vertical-align: middle;
+  /* Long cell content wraps instead of widening the table */
+  overflow-wrap: anywhere;
+}
+
+/* Keep the header visible while the body scrolls horizontally */
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--surface-alt);
 }
 
 .table tbody tr:hover {
@@ -937,99 +1050,11 @@ hr {
   background-color: var(--accent);
 }
 
-/* --- Navbar --- */
-.navbar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  height: var(--navbar-height);
-  padding: 0 var(--space-6);
-  background-color: var(--primary);
-  color: var(--text-inverse);
-  box-shadow: var(--shadow-md);
-  position: sticky;
-  top: 0;
-  z-index: var(--z-navbar);
-}
-
-.navbar-brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  font-size: var(--text-lg);
-  font-weight: var(--font-bold);
-  color: var(--text-inverse);
-  white-space: nowrap;
-}
-
-.navbar-nav {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.navbar-link {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  color: rgba(255, 255, 255, 0.8);
-  border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
-}
-
-.navbar-link:hover {
-  color: var(--text-inverse);
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.navbar-link.active {
-  color: var(--text-inverse);
-  background-color: rgba(255, 255, 255, 0.15);
-}
-
-/* --- Sidebar --- */
-.sidebar {
-  width: var(--sidebar-width);
-  height: calc(100vh - var(--navbar-height));
-  background-color: var(--surface);
-  border-right: 1px solid var(--border-light);
-  overflow-y: auto;
-  position: sticky;
-  top: var(--navbar-height);
-}
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-4);
-}
-
-.sidebar-link {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  color: var(--text-secondary);
-  border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
-}
-
-.sidebar-link:hover {
-  color: var(--text);
-  background-color: var(--surface-alt);
-}
-
-.sidebar-link.active {
-  color: var(--primary);
-  background-color: var(--primary-50);
-  font-weight: var(--font-semibold);
-}
+/* --- Navbar / Sidebar ---
+   Styling for `.navbar`, `.sidebar` and their parts lives in
+   components/navigation/Navigation.css. It is intentionally NOT duplicated
+   here: the two definitions previously fought each other and left the fixed
+   sidebar 4rem short of the viewport bottom. */
 
 /* --- Alert / Notification --- */
 .alert {
@@ -1076,7 +1101,8 @@ hr {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-6);
+  padding: var(--page-gutter);
+  overscroll-behavior: contain;
 }
 
 .modal {
@@ -1085,8 +1111,13 @@ hr {
   box-shadow: var(--shadow-xl);
   width: 100%;
   max-width: 32rem;
+  /* dvh keeps the dialog usable when mobile browser chrome is expanded */
   max-height: 90vh;
-  overflow-y: auto;
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
   z-index: var(--z-modal);
 }
 
@@ -1094,27 +1125,42 @@ hr {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-5) var(--space-6);
+  gap: var(--space-3);
+  padding: var(--card-pad) var(--card-pad);
   border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+/* A long dialog title wraps/elides instead of pushing the close button out */
+.modal-header > :first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .modal-body {
-  padding: var(--space-6);
+  padding: var(--card-pad);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  min-height: 0;
 }
 
 .modal-footer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  flex-wrap: wrap;
   gap: var(--space-3);
-  padding: var(--space-4) var(--space-6);
+  padding: var(--card-pad);
   border-top: 1px solid var(--border-light);
+  flex-shrink: 0;
 }
 
 /* --- Pagination --- */
 .pagination {
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: var(--space-1);
 }
 
@@ -1152,6 +1198,14 @@ hr {
   align-items: center;
   gap: 0;
   border-bottom: 2px solid var(--border-light);
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
@@ -1194,13 +1248,13 @@ hr {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--space-12) var(--space-6);
+  padding: clamp(2rem, 6vw, 3rem) var(--page-gutter);
   text-align: center;
 }
 
 .empty-state-icon {
-  width: 4rem;
-  height: 4rem;
+  width: clamp(3rem, 12vw, 4rem);
+  height: clamp(3rem, 12vw, 4rem);
   margin-bottom: var(--space-4);
   color: var(--text-muted);
 }
@@ -1305,67 +1359,69 @@ hr {
 
 /* ============================================
    Responsive Breakpoints
+
+   Ladder (largest -> smallest). Everything above this section is
+   viewport-agnostic; fluid clamps do the continuous scaling and these
+   queries only handle genuine structural changes.
+
+     1800px+  ultrawide       extra breathing room, wider containers
+     1400px   large desktop   containers hit their max width
+     1200px   desktop         3-up grids
+     1024px   tablet landscape sidebar becomes an overlay drawer
+     768px    tablet portrait  navbar collapses, grids go 1-up
+     480px    large phone    compact paddings, full-width actions
+     360px    small phone    minimum supported width
    ============================================ */
 
-/* Large tablets and small desktops */
-@media (max-width: 1200px) {
-  .grid-cols-4 {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .sidebar {
-    width: 220px;
+/* --- Ultrawide (>= 1800px) --- */
+@media (min-width: 1800px) {
+  :root {
+    --page-max: 1560px;
   }
 }
 
-/* Tablets */
+/* --- Large desktop / small laptop (max-width: 1200px) --- */
+@media (max-width: 1200px) {
+  .grid-cols-4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* --- Tablet landscape (max-width: 1024px) ---
+   The sidebar becomes an off-canvas drawer; its width no longer
+   offsets the main column, so the token drops to 0. */
 @media (max-width: 1024px) {
   :root {
     --sidebar-width: 0px;
   }
 
-  .sidebar {
-    display: none;
-  }
-
-  .grid-cols-4 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
+  .grid-cols-4,
   .grid-cols-3 {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .container {
-    padding-left: var(--space-4);
-    padding-right: var(--space-4);
+  .grid-cols-2 {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
-/* Large phones */
+/* --- Tablet portrait (max-width: 768px) --- */
 @media (max-width: 768px) {
   :root {
     --navbar-height: 3.5rem;
+    --header-height: 3.5rem;
   }
 
-  h1 { font-size: var(--text-3xl); }
-  h2 { font-size: var(--text-2xl); }
-  h3 { font-size: var(--text-xl); }
-
+  /* Headings are clamp()-driven; only the multi-column utilities collapse */
   .grid-cols-4,
   .grid-cols-3,
   .grid-cols-2 {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .col-span-2,
   .col-span-3 {
     grid-column: span 1;
-  }
-
-  .container {
-    padding-left: var(--space-4);
-    padding-right: var(--space-4);
   }
 
   .hide-mobile {
@@ -1380,17 +1436,10 @@ hr {
   .table td {
     padding: var(--space-2) var(--space-3);
   }
-
-  .navbar-nav {
-    display: none;
-  }
 }
 
-/* Small phones */
+/* --- Large phone (max-width: 480px) --- */
 @media (max-width: 480px) {
-  h1 { font-size: var(--text-2xl); }
-  h2 { font-size: var(--text-xl); }
-
   .btn {
     padding: 0.5rem 1rem;
     font-size: var(--text-xs);
@@ -1398,12 +1447,71 @@ hr {
 
   .modal {
     max-width: 100%;
-    margin: var(--space-4);
   }
 
   .pagination {
     flex-wrap: wrap;
     justify-content: center;
+  }
+}
+
+/* --- Small phone (max-width: 360px) ---
+   Smallest supported width: shave the last few pixels of chrome so
+   content never has to scroll sideways. */
+@media (max-width: 360px) {
+  :root {
+    --page-gutter: 0.75rem;
+    --card-pad: 0.875rem;
+    --grid-gap: 0.75rem;
+  }
+
+  .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* --- Coarse pointers: enlarge icon-only controls to a real touch target ---
+   These are prefixed with `:root` on purpose. Component stylesheets
+   (Common.css, Admin.css, ...) are imported after this file, so at equal
+   specificity they would win — `:root .x` outranks a bare `.x`. */
+@media (pointer: coarse) {
+  /* Text buttons already get their width from their label, so only the
+     height needs a floor here */
+  :root .btn,
+  :root .modal-close,
+  :root .toast-dismiss,
+  :root .pagination-btn {
+    min-height: var(--tap-min);
+  }
+
+  /* Icon-only controls need both dimensions */
+  :root .btn-icon,
+  :root .action-btn,
+  :root .switch-btn,
+  :root .modal-close,
+  :root .toast-dismiss,
+  :root .pagination-btn {
+    min-width: var(--tap-min);
+  }
+
+  :root .btn-icon,
+  :root .action-btn,
+  :root .switch-btn {
+    width: var(--tap-min);
+    height: var(--tap-min);
+  }
+}
+
+/* --- Respect users who ask for less motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

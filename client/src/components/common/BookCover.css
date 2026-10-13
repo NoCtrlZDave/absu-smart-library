@@ -6,21 +6,25 @@
   justify-content: center;
   color: #fff;
   overflow: hidden;
+  min-width: 0;
 }
 
 .book-cover--small {
   height: 96px;
   width: 64px;
+  flex-shrink: 0;
   border-radius: 6px;
 }
 
 .book-cover--medium {
-  height: 200px;
+  /* Fluid so it never demands more height than a phone screen allows */
+  height: clamp(150px, 26vh, 200px);
+  width: 100%;
 }
 
 .book-cover--large {
-  height: 420px;
-  max-width: 300px;
+  height: clamp(300px, 55vh, 420px);
+  max-width: min(300px, 100%);
   border-radius: 12px;
   width: 100%;
   flex-direction: column;
@@ -41,15 +45,13 @@
   font-weight: 600;
   line-height: 1.4;
   opacity: 0.95;
+  /* Long titles wrap instead of being clipped by `overflow: hidden` */
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
 @media (max-width: 768px) {
   .book-cover--large {
-    height: 280px;
-    max-width: 100%;
-  }
-
-  .book-cover--medium {
-    height: 180px;
+    padding: 1.25rem;
   }
 }

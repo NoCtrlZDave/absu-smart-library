@@ -41,17 +41,20 @@
 .activity-action {
   font-weight: 600;
   color: var(--primary);
+  overflow-wrap: break-word;
 }
 
 .activity-entity {
   color: var(--text-secondary);
   font-size: 0.85rem;
+  overflow-wrap: anywhere;
 }
 
 .activity-desc {
   font-size: 0.85rem;
   color: var(--text-secondary);
   margin-top: 0.15rem;
+  overflow-wrap: anywhere;
 }
 
 .activity-time {
@@ -65,16 +68,19 @@
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  padding: 2rem 1rem;
+  padding: clamp(1.5rem, 6vw, 2rem) 1rem;
   color: var(--text-secondary);
   text-align: center;
   font-size: 0.9rem;
+  overflow-wrap: break-word;
 }
 
 .activity-more {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
+  /* Comfortable tap target */
+  min-height: 2.25rem;
   color: var(--primary);
   font-size: 0.85rem;
   font-weight: 500;

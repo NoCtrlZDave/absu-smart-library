@@ -1,12 +1,12 @@
 /* Admin Pages Styles */
 .admin-page {
-  max-width: 1400px;
+  max-width: var(--page-max);
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--page-gutter);
 }
 
 .page-header {
-  margin-bottom: 2rem;
+  margin-bottom: var(--section-gap);
 }
 
 .page-header h1 {
@@ -22,24 +22,28 @@
 /* Stats Grid */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: var(--grid-gap);
+  margin-bottom: var(--section-gap);
 }
 
 .stat-card {
   background: var(--surface);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: var(--card-pad);
   border: 1px solid var(--border);
   display: flex;
   align-items: flex-start;
   gap: 1rem;
+  /* When the card gets too narrow for icon + text side by side, the text
+     wraps onto its own line instead of overflowing. */
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .stat-icon {
-  width: 50px;
-  height: 50px;
+  width: clamp(40px, 12vw, 50px);
+  height: clamp(40px, 12vw, 50px);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -72,31 +76,42 @@
   color: var(--info);
 }
 
+.stat-content {
+  /* Basis lets the text drop below the icon in narrow cards */
+  flex: 1 1 90px;
+  min-width: 0;
+}
+
 .stat-content h3 {
   font-size: 1.5rem;
   color: var(--text);
   margin-bottom: 0.25rem;
+  overflow-wrap: break-word;
 }
 
 .stat-content p {
   color: var(--text-secondary);
   font-size: 0.9rem;
+  overflow-wrap: break-word;
 }
 
 /* Content Sections */
+/* Explicit minmax(0, ...) floors stop a wide child from widening the
+   whole page instead of scrolling its own card. */
 .content-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2rem;
-  margin-bottom: 2rem;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--grid-gap);
+  margin-bottom: var(--section-gap);
 }
 
 .content-card {
   background: var(--surface);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: var(--card-pad);
   border: 1px solid var(--border);
-  margin-bottom: 2rem;
+  margin-bottom: var(--section-gap);
+  min-width: 0;
 }
 
 .content-card h2 {
@@ -108,8 +123,12 @@
 }
 
 /* Tables */
+/* `auto` pairs with `overflow-x: auto` to give intentional, contained
+   horizontal scrolling instead of page-level overflow. */
 .table-container {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
 
 .data-table {
@@ -129,11 +148,14 @@
   color: var(--text);
   background: var(--background);
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .data-table td {
   color: var(--text-secondary);
   font-size: 0.9rem;
+  /* Long emails/URLs/IDs wrap rather than stretching the table */
+  overflow-wrap: anywhere;
 }
 
 .data-table tr:hover td {
@@ -146,7 +168,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--section-gap);
   flex-wrap: wrap;
 }
 
@@ -155,6 +177,15 @@
   gap: 1rem;
   flex: 1;
   max-width: 600px;
+  min-width: 0;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 /* Action Buttons */
@@ -210,7 +241,7 @@
 
 /* Settings */
 .settings-group {
-  margin-bottom: 2rem;
+  margin-bottom: var(--section-gap);
 }
 
 .settings-group h3 {
@@ -220,33 +251,40 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .settings-item {
   background: var(--background);
   border-radius: 8px;
-  padding: 1.25rem;
+  padding: var(--card-pad);
   margin-bottom: 0.75rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .settings-item-label {
   font-weight: 500;
   color: var(--text);
   margin-bottom: 0.25rem;
+  overflow-wrap: break-word;
 }
 
 .settings-item-description {
   font-size: 0.85rem;
   color: var(--text-secondary);
+  overflow-wrap: break-word;
 }
 
 /* Toggle Switch */
 .toggle-switch {
   width: 48px;
   height: 24px;
+  min-height: var(--tap-min);
+  flex-shrink: 0;
   background: var(--border);
   border-radius: 12px;
   position: relative;
@@ -281,6 +319,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
   padding: 1rem;
   background: var(--background);
   border-radius: 8px;
@@ -291,6 +331,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .health-dot {
@@ -313,7 +354,7 @@
 
 /* Library Structure */
 .structure-section {
-  margin-bottom: 2rem;
+  margin-bottom: var(--section-gap);
 }
 
 .structure-section h3 {
@@ -323,33 +364,43 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .structure-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
+  gap: var(--grid-gap);
 }
 
 .structure-item {
   background: var(--background);
   border-radius: 8px;
-  padding: 1.25rem;
+  padding: var(--card-pad);
   border: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.structure-item-info {
+  min-width: 0;
 }
 
 .structure-item-info h4 {
   color: var(--text);
   font-size: 0.95rem;
   margin-bottom: 0.25rem;
+  overflow-wrap: break-word;
 }
 
 .structure-item-info p {
   font-size: 0.85rem;
   color: var(--text-secondary);
+  overflow-wrap: break-word;
 }
 
 /* Badge */
@@ -360,6 +411,8 @@
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 500;
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
 
 .badge-success {
@@ -388,6 +441,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .dashboard-section-link {
@@ -398,6 +452,8 @@
   font-weight: 500;
   color: var(--primary);
   text-decoration: none;
+  /* Comfortable tap target */
+  min-height: 2.25rem;
   padding: 0.4rem 0.75rem;
   border-radius: 8px;
   background: var(--primary-light);
@@ -418,7 +474,7 @@
 /* Student registration form */
 .student-form-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -426,6 +482,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-wrap: wrap;
   margin-top: 1.25rem;
   padding: 0.9rem 1rem;
   background: var(--background);
@@ -458,6 +515,8 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .level-preview__value strong {
@@ -473,12 +532,15 @@
 .level-preview__hint {
   font-size: 0.85rem;
   color: var(--text-secondary);
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 
 .student-form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
+  flex-wrap: wrap;
   margin-top: 1.25rem;
 }
 
@@ -492,6 +554,7 @@
   color: var(--primary);
   border-radius: 8px;
   font-size: 0.85rem;
+  overflow-wrap: break-word;
 }
 
 /* Academic session / calendar */
@@ -499,6 +562,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-wrap: wrap;
   padding: 1rem;
   background: var(--background);
   border-radius: 10px;
@@ -540,15 +604,18 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
   margin-bottom: 1rem;
 }
 
 .academic-session__select {
-  flex: 1;
+  flex: 1 1 160px;
+  min-width: 0;
+  /* 16px floor stops iOS Safari zooming in on focus */
+  font-size: max(1rem, 0.95rem);
   padding: 0.7rem 0.9rem;
   border: 1px solid var(--border);
   border-radius: 8px;
-  font-size: 0.95rem;
   font-family: inherit;
   color: var(--text);
   background: var(--surface);
@@ -574,6 +641,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
   padding: 0.6rem 0.9rem;
   background: var(--background);
   border-radius: 8px;
@@ -589,6 +657,8 @@
   font-size: 0.9rem;
   color: var(--text);
   font-weight: 500;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .academic-session__add {
@@ -610,10 +680,12 @@
   display: flex;
   gap: 0.5rem;
   align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .academic-session__add-row .input-group {
-  flex: 1;
+  flex: 1 1 160px;
+  min-width: 0;
 }
 
 .academic-session__note {
@@ -626,6 +698,7 @@
   color: var(--info);
   border-radius: 8px;
   font-size: 0.8rem;
+  overflow-wrap: break-word;
 }
 
 .data-table code {
@@ -638,21 +711,17 @@
 
 @media (max-width: 1024px) {
   .content-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 768px) {
-  .admin-page {
-    padding: 1rem;
-  }
-
   .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .student-form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .toolbar {
@@ -667,6 +736,7 @@
 
   .toolbar-right {
     flex-direction: column;
+    align-items: stretch;
     width: 100%;
   }
 
@@ -674,6 +744,8 @@
     width: 100%;
   }
 
+  /* Keeps the data readable by giving the table a scroll floor rather than
+     crushing every column on a phone */
   .table-container .data-table {
     min-width: 640px;
   }
@@ -681,11 +753,7 @@
 
 @media (max-width: 480px) {
   .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .content-card {
-    padding: 1rem;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .data-table th,
@@ -698,7 +766,7 @@
 .import-dropzone {
   border: 2px dashed var(--border);
   border-radius: 12px;
-  padding: 2rem;
+  padding: clamp(1.25rem, 5vw, 2rem);
   text-align: center;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
@@ -755,12 +823,13 @@
   border: 1px solid var(--danger-border, #f5c6cb);
   color: var(--danger);
   font-size: 0.85rem;
+  overflow-wrap: break-word;
 }
 
 .import-errors__item {
   display: flex;
   gap: 0.5rem;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .import-errors__item + .import-errors__item {
@@ -783,7 +852,8 @@
 }
 
 .import-session-picker .select-wrapper {
-  max-width: 220px;
+  max-width: min(220px, 100%);
+  min-width: 0;
 }
 
 .import-preview {
@@ -801,12 +871,16 @@
   font-size: 0.8rem;
   color: var(--text-secondary);
   margin-left: auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .import-table-wrap {
   margin-top: 1rem;
   max-height: 340px;
-  overflow-y: auto;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   border: 1px solid var(--border);
   border-radius: 10px;
 }
@@ -823,6 +897,7 @@
   text-align: left;
   border-bottom: 1px solid var(--border);
   vertical-align: top;
+  overflow-wrap: anywhere;
 }
 
 .import-table th {
@@ -831,6 +906,8 @@
   font-weight: 600;
   position: sticky;
   top: 0;
+  white-space: nowrap;
+  z-index: 1;
 }
 
 .import-table tr:last-child td {
@@ -850,6 +927,7 @@
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
+  flex-wrap: wrap;
   margin-top: 1.25rem;
 }
 
@@ -886,11 +964,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.75rem 1rem;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .level-breakdown-bar {
-  width: 160px;
+  /* Flexible so the label keeps its space on narrow screens */
+  flex: 0 1 160px;
+  min-width: 48px;
   height: 8px;
   background: var(--surface-variant, #f1f3f5);
   border-radius: 999px;

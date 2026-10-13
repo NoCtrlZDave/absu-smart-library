@@ -7,6 +7,7 @@
   left: 0;
   right: 0;
   height: var(--navbar-height);
+  min-height: var(--navbar-height);
   background: rgba(255, 255, 255, 0.72);
   -webkit-backdrop-filter: blur(16px) saturate(160%);
   backdrop-filter: blur(16px) saturate(160%);
@@ -15,16 +16,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  gap: clamp(0.5rem, 1.5vw, 1.5rem);
+  padding: 0 var(--page-gutter);
   z-index: 1000;
 }
 
+/* The brand is the one thing that must never be squeezed out of existence */
 .navbar__brand {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 1;
+  min-width: 0;
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 0.92rem + 0.4vw, 1.2rem);
   font-weight: 700;
   color: var(--text);
   letter-spacing: -0.01em;
@@ -35,7 +40,7 @@
 }
 
 .navbar__brand-logo {
-  height: 34px;
+  height: clamp(26px, 6vw, 34px);
   width: auto;
   flex-shrink: 0;
   object-fit: contain;
@@ -46,29 +51,33 @@
   display: flex;
   flex-direction: column;
   line-height: 1.1;
+  min-width: 0;
 }
 
 .navbar__brand-sub {
-  font-size: 0.62rem;
+  font-size: clamp(0.55rem, 1.6vw, 0.62rem);
   font-weight: 700;
   color: var(--accent-dark);
   letter-spacing: 1.2px;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .navbar__links {
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
 }
 
 .navbar__link {
   position: relative;
-  padding: 8px 16px;
-  font-size: 0.9rem;
+  padding: 8px clamp(0.5rem, 1.4vw, 16px);
+  font-size: clamp(0.8rem, 0.7rem + 0.35vw, 0.9rem);
   font-weight: 500;
   color: var(--text-secondary);
   border-radius: var(--radius-full);
+  white-space: nowrap;
   transition: color var(--transition-fast), background var(--transition-fast);
 }
 
@@ -98,15 +107,18 @@
 .navbar__actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: clamp(0.375rem, 1.2vw, 12px);
+  flex-shrink: 0;
+  min-width: 0;
 }
 
 .navbar__auth-btn {
-  padding: 8px 20px;
+  padding: 8px clamp(0.75rem, 1.8vw, 20px);
   font-size: 0.875rem;
   font-weight: 600;
   border-radius: var(--radius-full);
   border: none;
+  white-space: nowrap;
   transition: all var(--transition-fast);
 }
 
@@ -138,12 +150,14 @@
   align-items: center;
   gap: 8px;
   position: relative;
+  min-width: 0;
 }
 
 .navbar__user-btn {
   display: flex;
   align-items: center;
   gap: 8px;
+  max-width: 100%;
   padding: 4px 12px 4px 4px;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-full);
@@ -155,14 +169,23 @@
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
+/* The name is the first thing to give up room when the bar gets tight */
+.navbar__user-btn > span:not(.navbar__user-avatar) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
 .navbar__user-btn:hover {
   border-color: var(--primary-light);
   box-shadow: var(--shadow-md);
 }
 
 .navbar__user-avatar {
-  width: 32px;
-  height: 32px;
+  width: clamp(26px, 6vw, 32px);
+  height: clamp(26px, 6vw, 32px);
+  flex-shrink: 0;
   border-radius: 50%;
   background: var(--accent);
   color: var(--text-on-accent);
@@ -178,7 +201,10 @@
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
+  /* never wider than the viewport on small screens */
+  width: max-content;
   min-width: 200px;
+  max-width: calc(100vw - 2 * var(--page-gutter));
   background: var(--surface);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
@@ -218,11 +244,16 @@
 
 .navbar__mobile-toggle {
   display: none;
-  padding: 8px;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
   border: none;
   background: none;
   color: var(--text);
   border-radius: var(--radius-md);
+  flex-shrink: 0;
   transition: background var(--transition-fast);
 }
 
@@ -237,10 +268,14 @@
   left: 0;
   right: 0;
   bottom: 0;
+  /* Respect the notch / home indicator on phones */
+  padding: var(--page-gutter);
+  padding-bottom: calc(var(--page-gutter) + env(safe-area-inset-bottom, 0px));
   background: var(--surface);
-  padding: 16px;
   z-index: 999;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .navbar__mobile-menu--open {
@@ -248,12 +283,16 @@
 }
 
 .navbar__mobile-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  /* Comfortable touch target */
+  min-height: var(--tap-min);
   padding: 14px 16px;
   font-size: 1rem;
   font-weight: 500;
   color: var(--text-secondary);
   border-radius: var(--radius-md);
+  overflow-wrap: anywhere;
   transition: all var(--transition-fast);
 }
 
@@ -272,6 +311,14 @@
   gap: 10px;
 }
 
+.navbar__mobile-actions .navbar__auth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-min);
+  width: 100%;
+}
+
 /* ================================================
    SIDEBAR — Admin/Librarian sidebar
    ================================================ */
@@ -280,7 +327,9 @@
   top: 0;
   left: 0;
   bottom: 0;
+  /* Full viewport height: `top`+`bottom` stretch it, never an explicit height */
   width: var(--sidebar-width);
+  max-width: 85vw;
   background: var(--primary-dark);
   color: #fff;
   display: flex;
@@ -289,13 +338,18 @@
   transition: transform var(--transition-normal);
   overflow-y: auto;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .sidebar__brand {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 20px 20px;
+  /* Room for the mobile close button, plus the iOS notch on landscape phones */
+  padding: 16px clamp(3rem, 12vw, 20px) 16px 20px;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
 }
@@ -316,6 +370,7 @@
   font-size: 1.1rem;
   font-weight: 700;
   line-height: 1.2;
+  min-width: 0;
 }
 
 .sidebar__brand-sub {
@@ -329,6 +384,7 @@
   flex: 1;
   padding: 12px 0;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .sidebar__section {
@@ -343,6 +399,7 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   opacity: 0.5;
+  overflow-wrap: anywhere;
 }
 
 .sidebar__link {
@@ -350,6 +407,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  /* Comfortable touch target on phones */
+  min-height: 2.75rem;
   padding: 10px 12px;
   font-size: 0.875rem;
   font-weight: 500;
@@ -357,6 +416,8 @@
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sidebar__link:hover {
@@ -391,6 +452,7 @@
 
 .sidebar__footer {
   padding: 12px 20px 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
 }
@@ -400,7 +462,8 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 8px 8px;
+  min-height: 2.75rem;
+  padding: 8px;
   font-size: 0.85rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.7);
@@ -436,6 +499,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  min-height: 2.75rem;
   padding: 8px;
   border-radius: var(--radius-md);
   transition: background var(--transition-fast);
@@ -476,6 +540,9 @@
   font-size: 0.7rem;
   opacity: 0.6;
   text-transform: capitalize;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Overlay for mobile sidebar */
@@ -485,41 +552,59 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
   z-index: 1000;
+  animation: sidebar-fade-in 0.2s ease;
 }
 
 .sidebar-overlay--visible {
   display: block;
 }
 
+@keyframes sidebar-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Close button inside sidebar (mobile) */
 .sidebar__close {
   display: none;
   position: absolute;
-  top: 16px;
+  top: 12px;
   right: 12px;
-  padding: 6px;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
   border: none;
   background: none;
   color: rgba(255, 255, 255, 0.6);
   border-radius: var(--radius-sm);
-  transition: color var(--transition-fast);
+  transition: color var(--transition-fast), background var(--transition-fast);
 }
 
 .sidebar__close:hover {
   color: #fff;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* ================================================
    RESPONSIVE
    ================================================ */
+
+/* Tablet landscape and below: sidebar becomes an off-canvas drawer */
 @media (max-width: 1024px) {
   .sidebar {
     width: min(80vw, 260px);
     transform: translateX(-100%);
+    box-shadow: none;
+    /* Keeps the closed drawer out of the tab order and the a11y tree */
+    visibility: hidden;
   }
 
   .sidebar--open {
     transform: translateX(0);
+    visibility: visible;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.45);
   }
 
   .sidebar__close {
@@ -527,26 +612,29 @@
   }
 }
 
-@media (max-width: 480px) {
-  .sidebar {
-    width: 84vw;
+/* On desktop the sidebar is permanently visible, so there is nothing to
+   dim and the overlay must never be able to cover the page. */
+@media (min-width: 1025px) {
+  .sidebar-overlay {
+    display: none !important;
   }
 }
 
-@media (max-width: 768px) {
+/* Small phone: give the drawer a little more of the screen */
+@media (max-width: 480px) {
+  .sidebar {
+    width: min(84vw, 300px);
+  }
+}
+
+/* Below 900px the four inline nav links no longer fit next to the
+   brand and the account control, so they collapse into the panel. */
+@media (max-width: 900px) {
   .navbar {
-    padding: 0 16px;
+    padding: 0 var(--page-gutter);
   }
 
   .navbar__links {
-    display: none;
-  }
-
-  .navbar__auth-btn {
-    display: none;
-  }
-
-  .navbar__user {
     display: none;
   }
 
@@ -555,7 +643,17 @@
   }
 }
 
-@media (min-width: 769px) {
+/* Very small phones: the account button keeps just the avatar so the
+   bar never wraps or overflows. Full controls live in the panel. */
+@media (max-width: 768px) {
+  .navbar > .navbar__actions > .navbar__auth-btn,
+  .navbar__user {
+    display: none;
+  }
+}
+
+/* The mobile panel is meaningless on desktop */
+@media (min-width: 901px) {
   .navbar__mobile-menu {
     display: none !important;
   }

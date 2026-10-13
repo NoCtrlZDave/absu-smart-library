@@ -140,9 +140,10 @@ function Sidebar({ role = 'librarian', isOpen, onClose, user }) {
       <div
         className={`sidebar-overlay ${isOpen ? 'sidebar-overlay--visible' : ''}`}
         onClick={onClose}
+        aria-hidden="true"
       />
 
-      <aside className={`sidebar ${isOpen ? 'sidebar--open' : ''}`}>
+      <aside className={`sidebar ${isOpen ? 'sidebar--open' : ''}`} aria-label="Main navigation">
         <button className="sidebar__close" onClick={onClose} aria-label="Close sidebar">
           <X size={18} />
         </button>

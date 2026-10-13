@@ -1,12 +1,12 @@
 /* Pillar Map Page Styles */
 .pillar-map-page {
-  max-width: 1400px;
+  max-width: var(--page-max);
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--page-gutter);
 }
 
 .page-header {
-  margin-bottom: 2rem;
+  margin-bottom: var(--section-gap);
 }
 
 .page-header h1 {
@@ -24,8 +24,8 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+  padding: var(--card-pad);
+  margin-bottom: var(--section-gap);
 }
 
 .pillar-map-resolver h3 {
@@ -129,21 +129,24 @@
   to { transform: rotate(360deg); }
 }
 
-/* Pillar grid */
+/* Pillar grid
+   min() lets the track shrink below its 320px ideal on narrow phones
+   instead of forcing a horizontal scrollbar. */
 .pillar-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  gap: var(--grid-gap);
 }
 
 .pillar-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 1.25rem;
+  padding: var(--card-pad);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .pillar-card__header {
@@ -208,6 +211,11 @@
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 0.1rem 0.4rem;
+  /* Codes are short, but an unexpected long value must not widen the
+     card; clip rather than overflow the grid track. */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -234,10 +242,6 @@
 }
 
 @media (max-width: 768px) {
-  .pillar-map-page {
-    padding: 1rem;
-  }
-
   .pillar-map-resolver__form {
     flex-direction: column;
   }

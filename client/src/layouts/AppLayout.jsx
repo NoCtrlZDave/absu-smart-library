@@ -13,9 +13,15 @@ function AppLayout({ role: roleProp }) {
   const role = roleProp || user?.role || 'librarian';
 
   useEffect(() => {
-    document.body.style.overflow = sidebarOpen ? 'hidden' : '';
+    if (!sidebarOpen) return;
+    document.body.style.overflow = 'hidden';
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setSidebarOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
     return () => {
       document.body.style.overflow = '';
+      window.removeEventListener('keydown', onKeyDown);
     };
   }, [sidebarOpen]);
 
@@ -111,7 +117,7 @@ function AppLayout({ role: roleProp }) {
               <span className="layout-admin__header-avatar">
                 {getInitials(user)}
               </span>
-              <div>
+              <div className="layout-admin__header-user-text">
                 <div className="layout-admin__header-name">
                   {getUserName(user)}
                 </div>
@@ -120,7 +126,7 @@ function AppLayout({ role: roleProp }) {
             </div>
 
             <button
-              className="layout-admin__toggle-btn"
+              className="layout-admin__header-icon-btn"
               onClick={logout}
               aria-label="Logout"
             >

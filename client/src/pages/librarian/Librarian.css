@@ -1,12 +1,12 @@
 /* Librarian Pages Styles */
 .librarian-page {
-  max-width: 1400px;
+  max-width: var(--page-max);
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--page-gutter);
 }
 
 .page-header {
-  margin-bottom: 2rem;
+  margin-bottom: var(--section-gap);
 }
 
 .page-header h1 {
@@ -22,24 +22,27 @@
 /* Stats Grid */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+  gap: var(--grid-gap);
+  margin-bottom: var(--section-gap);
 }
 
 .stat-card {
   background: var(--surface);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: var(--card-pad);
   border: 1px solid var(--border);
   display: flex;
   align-items: flex-start;
   gap: 1rem;
+  /* Text drops below the icon rather than overflowing in a narrow card */
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .stat-icon {
-  width: 50px;
-  height: 50px;
+  width: clamp(40px, 12vw, 50px);
+  height: clamp(40px, 12vw, 50px);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -72,31 +75,40 @@
   color: var(--info);
 }
 
+.stat-content {
+  flex: 1 1 90px;
+  min-width: 0;
+}
+
 .stat-content h3 {
   font-size: 1.5rem;
   color: var(--text);
   margin-bottom: 0.25rem;
+  overflow-wrap: break-word;
 }
 
 .stat-content p {
   color: var(--text-secondary);
   font-size: 0.9rem;
+  overflow-wrap: break-word;
 }
 
 /* Content Sections */
+/* Explicit minmax(0, ...) floors keep a wide child inside its own card */
 .content-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2rem;
-  margin-bottom: 2rem;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--grid-gap);
+  margin-bottom: var(--section-gap);
 }
 
 .content-card {
   background: var(--surface);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: var(--card-pad);
   border: 1px solid var(--border);
-  margin-bottom: 2rem;
+  margin-bottom: var(--section-gap);
+  min-width: 0;
 }
 
 .content-card h2 {
@@ -110,6 +122,8 @@
 /* Tables */
 .table-container {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
 
 .data-table {
@@ -129,11 +143,13 @@
   color: var(--text);
   background: var(--background);
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .data-table td {
   color: var(--text-secondary);
   font-size: 0.9rem;
+  overflow-wrap: anywhere;
 }
 
 .data-table tr:hover td {
@@ -146,7 +162,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--section-gap);
   flex-wrap: wrap;
 }
 
@@ -155,11 +171,14 @@
   gap: 1rem;
   flex: 1;
   max-width: 600px;
+  min-width: 0;
 }
 
 .toolbar-right {
   display: flex;
   gap: 0.75rem;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 /* Action Buttons */
@@ -193,21 +212,26 @@
 .shelf-tree {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--grid-gap);
 }
 
 .shelf-node {
   background: var(--background);
   border-radius: 12px;
-  padding: 1.25rem;
+  padding: var(--card-pad);
   border: 1px solid var(--border);
+  min-width: 0;
 }
 
 .shelf-node-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
   cursor: pointer;
+  /* Comfortable tap target when collapsing/expanding */
+  min-height: var(--tap-min);
   margin-bottom: 1rem;
 }
 
@@ -217,12 +241,15 @@
   gap: 0.75rem;
   font-size: 1rem;
   color: var(--text);
+  min-width: 0;
+  flex-wrap: wrap;
+  overflow-wrap: break-word;
 }
 
 .shelf-children {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr));
+  gap: var(--grid-gap);
   margin-left: 2rem;
 }
 
@@ -231,12 +258,14 @@
   border-radius: 8px;
   padding: 1rem;
   border: 1px solid var(--border);
+  min-width: 0;
 }
 
 .shelf-child h4 {
   font-size: 0.9rem;
   color: var(--text);
   margin-bottom: 0.5rem;
+  overflow-wrap: break-word;
 }
 
 /* Capacity Indicator */
@@ -286,20 +315,21 @@
 /* Form Styles */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+  gap: var(--grid-gap);
 }
 
 .form-grid-2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--grid-gap);
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .form-group label {
@@ -312,7 +342,7 @@
 .upload-area {
   border: 2px dashed var(--border);
   border-radius: 12px;
-  padding: 2rem;
+  padding: clamp(1.25rem, 5vw, 2rem);
   text-align: center;
   cursor: pointer;
   transition: all 0.2s;
@@ -327,14 +357,15 @@
 .scan-section {
   background: var(--background);
   border-radius: 12px;
-  padding: 3rem 2rem;
+  padding: clamp(1.5rem, 5vw, 3rem) var(--page-gutter);
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--section-gap);
 }
 
 .scan-icon {
-  width: 80px;
-  height: 80px;
+  width: clamp(60px, 20vw, 80px);
+  height: clamp(60px, 20vw, 80px);
+  flex-shrink: 0;
   background: var(--primary-light);
   color: var(--primary);
   border-radius: 50%;
@@ -349,18 +380,24 @@
   margin: 0 auto;
   display: flex;
   gap: 1rem;
+  min-width: 0;
+}
+
+.scan-input > * {
+  min-width: 0;
 }
 
 /* Report Card */
 .report-type-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: var(--section-gap);
 }
 
 .report-type-card {
   padding: 1.5rem;
+  min-height: 6rem;
   border-radius: 12px;
   border: 2px solid var(--border);
   text-align: center;
@@ -383,12 +420,13 @@
 .report-type-card h4 {
   margin-bottom: 1rem;
   color: inherit;
+  overflow-wrap: break-word;
 }
 
 .report-area {
   background: var(--background);
   border-radius: 12px;
-  padding: 3rem;
+  padding: clamp(1.5rem, 5vw, 3rem);
   text-align: center;
   border: 1px dashed var(--border);
 }
@@ -396,10 +434,12 @@
 .report-area h3 {
   color: var(--text);
   margin-bottom: 0.75rem;
+  overflow-wrap: break-word;
 }
 
 .report-area p {
   color: var(--text-secondary);
+  overflow-wrap: break-word;
 }
 
 /* Badges */
@@ -410,6 +450,8 @@
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 500;
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
 
 .badge-success {
@@ -434,21 +476,17 @@
 
 @media (max-width: 1024px) {
   .content-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .form-grid-2 {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 768px) {
-  .librarian-page {
-    padding: 1rem;
-  }
-
   .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .toolbar {
@@ -463,6 +501,7 @@
 
   .toolbar-right {
     flex-direction: column;
+    align-items: stretch;
     width: 100%;
   }
 
@@ -470,6 +509,7 @@
     width: 100%;
   }
 
+  /* Scroll floor keeps columns readable instead of crushing them */
   .table-container .data-table {
     min-width: 640px;
   }
@@ -477,40 +517,46 @@
   .scan-input {
     flex-direction: column;
   }
+
+  /* Reclaim the tree indent on phones */
+  .shelf-children {
+    margin-left: 0;
+  }
 }
 
 @media (max-width: 480px) {
   .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .content-card {
-    padding: 1rem;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .data-table th,
   .data-table td {
     padding: 0.6rem;
   }
-
-  .report-area {
-    padding: 2rem 1rem;
-  }
 }
 
-/* Shelf Management actions */
+/* Shelf Management actions
+   These fade in on hover, but touch devices never fire hover — so the
+   dimmed state has to be opt-in and the solid state the default there. */
 .shelf-actions {
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
-  opacity: 0.25;
+  opacity: 1;
   transition: opacity 0.2s;
 }
 
-.shelf-node-header:hover .shelf-actions,
-.shelf-child:hover .shelf-actions,
-.shelf-actions:hover {
-  opacity: 1;
+@media (hover: hover) and (pointer: fine) {
+  .shelf-actions {
+    opacity: 0.25;
+  }
+
+  .shelf-node-header:hover .shelf-actions,
+  .shelf-child:hover .shelf-actions,
+  .shelf-actions:focus-within,
+  .shelf-actions:hover {
+    opacity: 1;
+  }
 }
 
 .shelf-actions .action-btn {
@@ -521,4 +567,17 @@
 .shelf-actions .action-btn svg {
   width: 13px;
   height: 13px;
+}
+
+/* ...but on touch they still need to be reachable */
+@media (pointer: coarse) {
+  .shelf-actions .action-btn {
+    width: var(--tap-min);
+    height: var(--tap-min);
+  }
+
+  .shelf-actions .action-btn svg {
+    width: 16px;
+    height: 16px;
+  }
 }

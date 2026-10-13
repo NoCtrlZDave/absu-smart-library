@@ -11,7 +11,9 @@
     radial-gradient(1100px 520px at 12% -10%, rgba(233, 154, 58, 0.28) 0%, rgba(233, 154, 58, 0) 55%),
     radial-gradient(900px 480px at 95% 15%, rgba(30, 58, 117, 0.55) 0%, rgba(6, 22, 63, 0) 60%),
     linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 55%, var(--brand-navy) 100%);
-  padding: clamp(5rem, 10vw, 8rem) 2rem 5.5rem;
+  /* Vertical breathing room on desktop, much less on phones so the search
+     bar is reachable without scrolling past a wall of navy */
+  padding: clamp(3rem, 10vw, 8rem) clamp(1rem, 4vw, 2rem) clamp(2.5rem, 8vw, 5.5rem);
   text-align: center;
   color: white;
   position: relative;
@@ -112,7 +114,12 @@
   margin-right: auto;
 }
 
+/* --- Hero search ---
+   The icon is positioned against `.hero-search__field` (the input's own
+   row), NOT the form. That keeps it aligned with the text when the form
+   stacks into a column on narrow screens. */
 .hero-search {
+  width: 100%;
   max-width: 620px;
   margin: 0 auto;
   display: flex;
@@ -131,9 +138,18 @@
   transform: translateY(-1px);
 }
 
+.hero-search__field {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  /* Lets the input shrink instead of forcing the row wider */
+  min-width: 0;
+}
+
 .hero-search-icon {
   position: absolute;
-  left: 1.5rem;
+  left: 1.15rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
@@ -143,13 +159,27 @@
 
 .hero-search input {
   flex: 1;
+  /* Must be able to shrink or the field's intrinsic width overflows */
+  min-width: 0;
   border: none;
-  padding: 1rem 1.25rem 1rem 3.1rem;
-  font-size: 1.02rem;
+  /* Left padding clears the absolutely positioned icon */
+  padding: 0.9rem 0.75rem 0.9rem 3rem;
+  /* Never below 16px — iOS Safari zooms the viewport on focus otherwise */
+  font-size: max(1rem, 1.02rem);
+  line-height: 1.4;
   outline: none;
   border-radius: var(--radius-full);
   color: var(--text);
   background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Hide the WebKit "x" so it can't collide with our own controls */
+.hero-search input::-webkit-search-cancel-button,
+.hero-search input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .hero-search input::placeholder {
@@ -157,6 +187,7 @@
 }
 
 .hero-search button {
+  flex-shrink: 0;
   padding: 0.95rem 2.1rem;
   background: var(--accent);
   color: #fff;
@@ -164,6 +195,8 @@
   border-radius: var(--radius-full);
   font-weight: 600;
   font-size: 0.95rem;
+  /* Comfortable tap target */
+  min-height: 2.75rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -198,6 +231,10 @@
   font-weight: 500;
   color: rgba(255, 255, 255, 0.85);
   padding: 6px 14px;
+  /* Comfortable tap target */
+  min-height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
   border-radius: var(--radius-full);
   border: 1px solid rgba(255, 255, 255, 0.22);
   background: rgba(255, 255, 255, 0.06);
@@ -313,7 +350,7 @@
    ---------------------------------------------------------- */
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
   gap: 1.5rem;
 }
 
@@ -415,7 +452,7 @@
    ---------------------------------------------------------- */
 .books-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(210px, 100%), 1fr));
   gap: 1.75rem;
 }
 
@@ -504,7 +541,7 @@
    ---------------------------------------------------------- */
 .steps-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 2rem;
 }
 
@@ -560,7 +597,7 @@
   border-radius: var(--radius-3xl);
   padding: clamp(2.5rem, 6vw, 4rem) clamp(1.5rem, 5vw, 3.5rem);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
   gap: 1.5rem;
   box-shadow: var(--shadow-xl);
   position: relative;
@@ -767,24 +804,27 @@
 }
 
 .search-content {
-  max-width: 1200px;
+  max-width: var(--page-max);
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--page-gutter);
   display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 2rem;
+  /* minmax(0, ...) on the fluid track stops wide result cards from
+     widening the page instead of scrolling within it */
+  grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+  gap: var(--grid-gap);
 }
 
 /* Filters Sidebar */
 .filters-sidebar {
   background: var(--surface);
   border-radius: var(--radius-xl);
-  padding: 1.5rem;
+  padding: var(--card-pad);
   border: 1px solid var(--border-light);
   box-shadow: var(--shadow-card);
   height: fit-content;
   position: sticky;
   top: calc(var(--navbar-height) + 16px);
+  min-width: 0;
 }
 
 .filters-sidebar h3 {
@@ -871,7 +911,7 @@
 
 .results-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
   gap: 1.75rem;
 }
 
@@ -879,18 +919,18 @@
    Book Details Page
    ---------------------------------------------------------- */
 .book-details {
-  max-width: 1200px;
+  max-width: var(--page-max);
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--page-gutter);
 }
 
 .book-details-content {
   display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 3rem;
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
   background: var(--surface);
   border-radius: var(--radius-2xl);
-  padding: 2.5rem;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
   border: 1px solid var(--border-light);
   box-shadow: var(--shadow-card);
 }
@@ -898,26 +938,35 @@
 .book-cover-large {
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
+  /* Cover art never exceeds its column */
+  max-width: 100%;
+  height: auto;
+}
+
+.book-details-info {
+  min-width: 0;
 }
 
 .book-details-info h1 {
   font-size: clamp(1.6rem, 3vw, 2.1rem);
   color: var(--text);
   margin-bottom: 0.5rem;
+  overflow-wrap: break-word;
 }
 
 .book-author {
   font-size: 1.1rem;
   color: var(--text-secondary);
   margin-bottom: 1.5rem;
+  overflow-wrap: break-word;
 }
 
 .book-meta-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
   margin-bottom: 2rem;
-  padding: 1.5rem;
+  padding: var(--card-pad);
   background: var(--surface-alt);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
@@ -927,6 +976,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 0;
 }
 
 .meta-label {
@@ -940,6 +990,7 @@
 .meta-value {
   font-weight: 500;
   color: var(--text);
+  overflow-wrap: break-word;
 }
 
 .book-description {
@@ -1266,8 +1317,8 @@
 
 .location-step {
   display: grid;
-  grid-template-columns: 64px 1fr;
-  gap: 1.25rem;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: clamp(0.75rem, 3vw, 1.25rem);
   position: relative;
   padding-bottom: 2.25rem;
 }
@@ -1448,7 +1499,7 @@
 
 .about-content {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: 2rem;
   margin-bottom: 3rem;
 }
@@ -1488,7 +1539,7 @@
 
 .contact-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
   gap: 1.5rem;
 }
 
@@ -1525,7 +1576,7 @@
    ---------------------------------------------------------- */
 .contact-form-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: 1.25rem;
   margin-bottom: 1.25rem;
 }
@@ -1557,29 +1608,43 @@
     font-size: clamp(2rem, 9vw, 2.6rem);
   }
 
+  /* --- Stacked search ---
+     The icon stays glued to the input because it is positioned against
+     `.hero-search__field`, which never changes direction. */
   .hero-search {
     flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: 0.5rem;
     border-radius: var(--radius-2xl);
+    max-width: 100%;
   }
 
-  .hero-search-icon {
-    left: 1.4rem;
+  .hero-search__field {
+    width: 100%;
   }
 
   .hero-search input {
     width: 100%;
-    padding-bottom: 0.75rem;
+    padding: 0.85rem 0.75rem 0.85rem 2.85rem;
+    /* 16px floor: prevents iOS zoom-on-focus */
+    font-size: 1rem;
+  }
+
+  .hero-search-icon {
+    left: 1rem;
   }
 
   .hero-search button {
     width: 100%;
     justify-content: center;
     padding: 0.9rem 1.5rem;
+    /* Full-width primary action */
+    min-height: 3rem;
   }
 
   .search-content {
-    grid-template-columns: 1fr;
-    padding: 1.25rem;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .results-header {
@@ -1591,16 +1656,24 @@
     display: inline-flex !important;
   }
 
+  /* Filters become an off-canvas drawer */
   .filters-sidebar {
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
     width: min(85vw, 320px);
+    max-width: 100vw;
+    /* Respect the notch and home indicator */
+    padding-top: max(var(--card-pad), env(safe-area-inset-top, 0px));
+    padding-bottom: calc(var(--card-pad) + env(safe-area-inset-bottom, 0px));
+    padding-left: max(var(--card-pad), env(safe-area-inset-left, 0px));
     border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
     box-shadow: 0 8px 32px rgba(6, 22, 63, 0.3);
     z-index: 1100;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     display: none;
   }
 
@@ -1609,7 +1682,6 @@
     animation: slideInLeft 0.25s ease;
   }
 
-  .book-details,
   .book-location,
   .about-page {
     padding: 1rem;
@@ -1625,7 +1697,7 @@
   }
 
   .book-details-content {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     padding: 1.5rem;
   }
 
@@ -1688,12 +1760,63 @@
     width: 100%;
   }
 
+  /* --- Hero search on small phones --- */
+  .hero-search {
+    padding: 0.4rem;
+    gap: 0.4rem;
+    border-radius: var(--radius-xl);
+  }
+
+  /* Reclaim horizontal room for the text field */
+  .hero-search-icon {
+    left: 0.85rem;
+  }
+
+  .hero-search input {
+    padding-left: 2.6rem;
+    padding-right: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .hero-search button {
+    padding: 0.85rem 1rem;
+    font-size: 0.9rem;
+    min-height: 2.75rem;
+  }
+
+  .hero-content p {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Chips scroll sideways in one row instead of stacking into a tall
+     block that pushes the fold further down */
+  .hero-chips {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    /* Bleed to the screen edges so it reads as scrollable */
+    margin-left: calc(-1 * clamp(1rem, 4vw, 2rem));
+    margin-right: calc(-1 * clamp(1rem, 4vw, 2rem));
+    padding: 0 clamp(1rem, 4vw, 2rem) 2px;
+  }
+
+  .hero-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hero-chips > * {
+    flex-shrink: 0;
+  }
+
   .search-header-form {
     flex-direction: column;
   }
 
   .book-meta-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     padding: 1rem;
   }
 
@@ -1715,6 +1838,43 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
+  }
+}
+
+/* ----------------------------------------------------------
+   Landscape phones: the viewport is wide but very short, so the
+   hero's tall padding would push the search bar below the fold.
+   Reclaim the vertical space and let the bar go back to a row.
+   ---------------------------------------------------------- */
+@media (max-height: 520px) and (orientation: landscape) {
+  .hero-section {
+    padding-top: 2.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .hero-content h1 {
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+  }
+
+  .hero-content p {
+    margin-bottom: 1.25rem;
+  }
+
+  .hero-eyebrow {
+    margin-bottom: 0.75rem;
+  }
+
+  .hero-search {
+    flex-direction: row;
+    align-items: center;
+    border-radius: var(--radius-full);
+    padding: 0.4rem;
+  }
+
+  .hero-search button {
+    width: auto;
+    min-height: 2.5rem;
+    padding: 0.7rem 1.5rem;
   }
 }
 
