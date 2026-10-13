@@ -14,7 +14,7 @@ import { useToast } from '../components/common/useToast';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
-  const { user, changePassword } = useAuth();
+  const { user, changePassword, updateProfile } = useAuth();
   const toast = useToast();
 
   const fullName =
@@ -75,7 +75,7 @@ const ProfilePage = () => {
     return errors;
   };
 
-  const handleSaveProfile = (e) => {
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
     const errors = validateProfile();
     if (Object.keys(errors).length > 0) {
@@ -83,10 +83,27 @@ const ProfilePage = () => {
       return;
     }
     setSavingProfile(true);
-    setTimeout(() => {
-      setSavingProfile(false);
+    const [first_name, last_name] = personalInfo.fullName
+      .trim()
+      .split(/\s+/);
+    const result = await updateProfile({
+      first_name: first_name || '',
+      last_name: last_name || '',
+      phone: personalInfo.phone,
+    });
+    setSavingProfile(false);
+    if (result.success) {
+      setPersonalInfo((prev) => ({
+        ...prev,
+        fullName: [result.user.first_name, result.user.last_name]
+          .filter(Boolean)
+          .join(' '),
+      }));
+      setGeneralError('');
       toast('Profile updated successfully', 'success');
-    }, 800);
+    } else {
+      setGeneralError(result.error);
+    }
   };
 
   const handleChangePassword = async (e) => {
@@ -156,6 +173,21 @@ const ProfilePage = () => {
           <h3 style={{ marginBottom: '1.5rem', color: 'var(--text)' }}>
             Personal Information
           </h3>
+          {generalError && (
+            <div
+              style={{
+                background: 'rgba(211,47,47,0.08)',
+                border: '1px solid rgba(211,47,47,0.3)',
+                color: 'var(--danger)',
+                borderRadius: 8,
+                padding: '0.75rem 1rem',
+                marginBottom: '1rem',
+                fontSize: '0.875rem',
+              }}
+            >
+              {generalError}
+            </div>
+          )}
           <div className="form-grid">
             <div className="form-group">
               <label>Full Name</label>

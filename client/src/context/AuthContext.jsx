@@ -94,9 +94,20 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const updateProfile = useCallback(async (payload) => {
+    try {
+      const updated = await authApi.updateProfile(payload);
+      setUser(updated);
+      localStorage.setItem(USER_KEY, JSON.stringify(updated));
+      return { success: true, user: updated };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ user, login, addUser, logout, changePassword, loading }}
+      value={{ user, login, addUser, logout, changePassword, updateProfile, loading }}
     >
       {children}
     </AuthContext.Provider>

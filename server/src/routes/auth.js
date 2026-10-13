@@ -53,6 +53,29 @@ router.get(
   asyncHandler(async (req, res) => ok(res, req.user.toSafeJSON(), 'Authenticated user'))
 );
 
+router.put(
+  '/profile',
+  protect,
+  [
+    body('first_name').optional().trim().notEmpty().withMessage('First name is required'),
+    body('last_name').optional().trim().notEmpty().withMessage('Last name is required'),
+    body('phone').optional().trim(),
+  ],
+  validate,
+  asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    if (!user) return notFound(res, 'User not found');
+
+    if (req.body.first_name !== undefined) user.first_name = String(req.body.first_name).trim();
+    if (req.body.last_name !== undefined) user.last_name = String(req.body.last_name).trim();
+    if (req.body.phone !== undefined) user.phone = String(req.body.phone).trim() || null;
+
+    await user.save();
+    await logActivity({ actor: user, action: 'PROFILE_UPDATED', entity: 'User', entityId: user._id });
+    return ok(res, user.toSafeJSON(), 'Profile updated');
+  })
+);
+
 router.post(
   '/change-password',
   protect,
