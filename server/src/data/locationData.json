@@ -19,15 +19,15 @@
       "2": { "image": "", "caption": "Pillar 2 - Geography, Social Sciences and Economics" },
       "3": { "image": "", "caption": "Pillar 3 - Economic Theory, Management and Estate Management" },
       "4": { "image": "", "caption": "Pillar 4 - Commerce, Marketing, Accounting and Industries" },
-      "5": { "image": "", "caption": "Pillar 5 - Finance, Banking, Sociology and Commerce" },
+      "5": { "image": "", "caption": "Pillar 5 - Finance, Banking, Sociology, Criminology and Security Studies" },
       "6": { "image": "", "caption": "Pillar 6 - Urban and Regional Planning / Political Science" },
       "7": { "image": "", "caption": "Pillar 7 - Fine and Applied Arts, Education and Music" },
-      "8": { "image": "", "caption": "Pillar 8 - Silence zone" },
-      "9": { "image": "", "caption": "Pillar 9 - Science, Mathematics, Optometry and Medicine" },
-      "10": { "image": "", "caption": "Pillar 10 - Physics, Statistics and Computer Science" },
+      "8": { "image": "", "caption": "Pillar 8 - Film and Multimedia Studies, Broadcasting, Mass Communication and Media Studies" },
+      "9": { "image": "", "caption": "Pillar 9 - Science, Mathematics, Optometry, Medicine, Software Engineering and Artificial Intelligence" },
+      "10": { "image": "", "caption": "Pillar 10 - Physics, Statistics, Computer Science and Cyber Security" },
       "11": { "image": "", "caption": "Pillar 11 - Chemistry, Biology, Geology and Biochemistry" },
       "12": { "image": "", "caption": "Pillar 12 - Engineering, Microbiology and Pathology" },
-      "13": { "image": "", "caption": "Pillar 13 - Library Science and Computer Engineering" }
+      "13": { "image": "", "caption": "Pillar 13 - Library and Information Science, Computer Engineering, Electrical/Electronic Engineering and Civil Engineering" }
     },
     "subjects": {}
   },
@@ -90,7 +90,9 @@
         { "prefix": "HJ", "subject": "Public Finance" },
         { "prefix": "HM", "subject": "Sociology General" },
         { "prefix": "BANKING AND FINANCE", "subject": "BANKING AND FINANCE", "arrow": "Left and Right", "notes": "ETF 2006/2007" },
-        { "prefix": "HM", "subject": "SOCIOLOGY" }
+        { "prefix": "HM", "subject": "SOCIOLOGY" },
+        { "prefix": "CRIMINOLOGY", "subject": "CRIMINOLOGY" },
+        { "prefix": "SECURITY STUDIES", "subject": "SECURITY STUDIES" }
       ]
     },
     "6": {
@@ -129,8 +131,15 @@
     "8": {
       "pillar_number": "8",
       "floor": 1,
-      "subjects": [],
-      "notes": "Silence zone. No eating, no drinking. No phone calls."
+      "subjects": [
+        { "prefix": "FILM AND MULTIMEDIA STUDIES", "subject": "FILM AND MULTIMEDIA STUDIES" },
+        { "prefix": "BROADCASTING", "subject": "BROADCASTING" },
+        { "prefix": "PN", "subject": "PL-LINGUISTICS AND COMMUNICATION STUDIES" },
+        { "prefix": "MASS COMMUNICATION", "subject": "MASS COMMUNICATION" },
+        { "prefix": "PUBLIC RELATIONS", "subject": "PUBLIC RELATIONS" },
+        { "prefix": "ADVERTISING", "subject": "ADVERTISING" },
+        { "prefix": "JOURNALISM AND MEDIA STUDIES", "subject": "JOURNALISM AND MEDIA STUDIES" }
+      ]
     },
     "9": {
       "pillar_number": "9",
@@ -139,10 +148,12 @@
         { "prefix": "Q", "subject": "Science (General)" },
         { "prefix": "QA", "subject": "Mathematics" },
         { "prefix": "OPTOMETRY", "subject": "OPTOMETRY", "arrow": "Right" },
-        { "prefix": "R", "subject": "MEDCINE & SURGERY", "arrow": "Right" },
+        { "prefix": "R", "subject": "MEDICINE & SURGERY", "arrow": "Right" },
         { "prefix": "MEDICAL LABORATORY SCIENCE", "subject": "MEDICAL LABORATORY SCIENCE", "arrow": "Right" },
         { "prefix": "PHARMACY", "subject": "PHARMACY" },
-        { "prefix": "MEDICINE & SURGERY", "subject": "MEDICINE & SURGERY", "arrow": "Right" }
+        { "prefix": "MEDICINE & SURGERY", "subject": "MEDICINE & SURGERY", "arrow": "Right" },
+        { "prefix": "SOFTWARE ENGINEERING", "subject": "SOFTWARE ENGINEERING" },
+        { "prefix": "ARTIFICIAL INTELLIGENCE", "subject": "ARTIFICIAL INTELLIGENCE" }
       ]
     },
     "10": {
@@ -151,7 +162,8 @@
       "subjects": [
         { "prefix": "QC", "subject": "PHYSICS", "arrow": "Left" },
         { "prefix": "STATISTICS", "subject": "STATISTICS", "arrow": "Right", "notes": "ETF 2002" },
-        { "prefix": "COMPUTER SCIENCE", "subject": "COMPUTER SCIENCE", "arrow": "Right" }
+        { "prefix": "COMPUTER SCIENCE", "subject": "COMPUTER SCIENCE", "arrow": "Right" },
+        { "prefix": "CYBER SECURITY", "subject": "CYBER SECURITY" }
       ]
     },
     "11": {
@@ -195,7 +207,8 @@
         { "prefix": "CIVIL ENGINEERING", "subject": "CIVIL ENGINEERING", "arrow": "Left" },
         { "prefix": "BUILDING TECHNOLOGY", "subject": "BUILDING TECHNOLOGY", "arrow": "Left" },
         { "prefix": "SURVEYING AND GEOMATICS", "subject": "SURVEYING AND GEOMATICS", "arrow": "Right" },
-        { "prefix": "MICROBIOLOGY", "subject": "MICROBIOLOGY", "arrow": "Right" }
+        { "prefix": "MICROBIOLOGY", "subject": "MICROBIOLOGY", "arrow": "Right" },
+        { "prefix": "COMPUTER ENGINEERING", "subject": "COMPUTER ENGINEERING", "arrow": "Left" }
       ]
     },
     "13": {
@@ -204,7 +217,8 @@
       "subjects": [
         { "prefix": "Z", "subject": "LIBRARY AND INFORMATION SCIENCE", "arrow": "Left" },
         { "prefix": "COMPUTER ENGINEERING", "subject": "COMPUTER ENGINEERING", "arrow": "Right" },
-        { "prefix": "ELECTRICAL ELECTRONIC ENGINEERING", "subject": "ELECTRICAL ELECTRONIC ENGINEERING", "arrow": "Right" }
+        { "prefix": "ELECTRICAL ELECTRONIC ENGINEERING", "subject": "ELECTRICAL ELECTRONIC ENGINEERING", "arrow": "Right" },
+        { "prefix": "CIVIL ENGINEERING", "subject": "CIVIL ENGINEERING", "arrow": "Left" }
       ]
     }
   }
