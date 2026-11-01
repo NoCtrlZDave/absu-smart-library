@@ -107,7 +107,7 @@ const StudentDashboard = () => {
         <p>Your loans, reservations, and library alerts in one place.</p>
       </div>
 
-      <div className="account-note" style={{ marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+      <div className="account-note" style={{ marginBottom: '1.5rem', flexWrap: 'wrap', color: '#fff' }}>
         <Hash size={18} />
         <span>
           <strong>{user?.matricNumber || 'Matric number not set'}</strong>
