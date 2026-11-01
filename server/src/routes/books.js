@@ -12,6 +12,7 @@ import { CATALOGUE_ROLES } from '../services/policies.js';
 import { previewBookImport, importBookRows, BOOK_IMPORT_TEMPLATE_HEADERS } from '../services/bookImport.js';
 import { PERMISSIONS } from '../config/permissions.js';
 import { requirePermission } from '../middleware/auth.js';
+import { getReservationsByBook } from '../services/circulation.js';
 
 const router = express.Router();
 
@@ -236,9 +237,12 @@ router.get('/', asyncHandler(async (req, res) => {
   const total = docs.length;
   const totalPages = Math.ceil(total / perPage);
   const slice = docs.slice((pageNum - 1) * perPage, pageNum * perPage);
+  const reservationMap = await getReservationsByBook(slice.map((d) => d._id));
 
   return ok(res, {
-    books: slice.map((d) => new Book(d).toCatalogueJSON()),
+    books: slice.map((d) =>
+      new Book(d).toCatalogueJSON(reservationMap.get(String(d._id)) || { pending: 0, approved: 0 })
+    ),
     pagination: {
       page: pageNum,
       limit: perPage,
@@ -314,7 +318,11 @@ router.get('/:id', asyncHandler(async (req, res) => {
     book = await Book.findOne({ isbn: id });
   }
   if (!book) return notFound(res, 'Book not found');
-  return ok(res, book.toCatalogueJSON());
+  const reservationMap = await getReservationsByBook([book._id]);
+  return ok(
+    res,
+    book.toCatalogueJSON(reservationMap.get(String(book._id)) || { pending: 0, approved: 0 })
+  );
 }));
 
 router.post(

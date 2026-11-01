@@ -1,14 +1,13 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, BookOpen, Activity, CalendarDays, GraduationCap, Save } from 'lucide-react';
 import ActivityFeed from '../../components/audit/ActivityFeed';
-import { Button, Select } from '../../components/common';
+import { Button, Input } from '../../components/common';
 import { useToast } from '../../components/common/useToast';
 import { adminApi } from '../../services/admin';
 import { dashboardApi } from '../../services/dashboard';
 import {
   ACADEMIC_SESSION_KEY,
-  buildAcademicSessionOptions,
   computeLevelFromMatric,
   getDefaultAcademicSession,
   normalizeAcademicSession,
@@ -43,30 +42,30 @@ const AdminDashboard = () => {
     return () => { mounted = false; };
   }, []);
 
-  const sessionOptions = useMemo(() => {
-    const options = buildAcademicSessionOptions();
-    if (session && !options.some((option) => option.value === session)) {
-      return [...options, { value: session, label: session }].sort(
-        (a, b) => Number(a.value.slice(0, 4)) - Number(b.value.slice(0, 4))
-      );
-    }
-    return options;
-  }, [session]);
-
-  const levelPreview = computeLevelFromMatric('2021/131178/REGULAR', session);
+  const normalizedSession = normalizeAcademicSession(session);
+  const sessionError = session && !normalizedSession
+    ? 'Enter a valid session in the format YYYY/YYYY, e.g. 2026/2027.'
+    : '';
+  const levelPreview = computeLevelFromMatric('2021/131178/REGULAR', normalizedSession);
 
   const saveSession = async () => {
+    if (!normalizedSession) {
+      showToast('Enter a valid session in the format YYYY/YYYY, e.g. 2026/2027.', 'error');
+      return;
+    }
+
     setSavingSession(true);
     try {
       await adminApi.saveSettings([
         {
           key: ACADEMIC_SESSION_KEY,
-          value: session,
+          value: normalizedSession,
           label: 'Current session',
           category: 'academic',
         },
       ]);
-      showToast(`Academic session set to ${session}.`, 'success');
+      setSession(normalizedSession);
+      showToast(`Academic session set to ${normalizedSession}.`, 'success');
     } catch (err) {
       showToast(err.message || 'Could not save the academic session.', 'error');
     } finally {
@@ -121,14 +120,16 @@ const AdminDashboard = () => {
             marginTop: '1.25rem',
           }}
         >
-          <Select
+          <Input
             label="Current session"
+            placeholder="e.g. 2026/2027"
             value={session}
             onChange={(event) => setSession(event.target.value)}
-            options={sessionOptions}
+            error={sessionError}
+            helper="Type any academic session manually, e.g. 2026/2027."
           />
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <Button onClick={saveSession} loading={savingSession} disabled={!session}>
+            <Button onClick={saveSession} loading={savingSession} disabled={!normalizedSession}>
               <Save size={18} />
               Save session
             </Button>
@@ -146,7 +147,7 @@ const AdminDashboard = () => {
             <div className="level-preview__value">
               2021/131178/REGULAR <span>→</span>{' '}
               <strong>{levelPreview ? `${levelPreview} Level` : 'Not available'}</strong>
-              <span className="level-preview__meta">in {session}</span>
+              <span className="level-preview__meta">in {normalizedSession || session}</span>
             </div>
           </div>
         </div>

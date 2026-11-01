@@ -14,10 +14,11 @@ export const getDefaultSession = (date = new Date()) => {
 };
 
 export const normalizeSession = (value) => {
-  const match = String(value ?? '').match(/(\d{4})/);
+  const match = String(value ?? '').trim().match(/^(\d{4})(?:\s*\/\s*(\d{4}))?$/);
   if (!match) return null;
   const start = Number(match[1]);
   if (!Number.isFinite(start) || start < MIN_YEAR || start > MAX_YEAR) return null;
+  if (match[2] && Number(match[2]) !== start + 1) return null;
   return `${start}/${start + 1}`;
 };
 

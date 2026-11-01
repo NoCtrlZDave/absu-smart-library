@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Button, Pagination, BookCover } from '../../components/common';
 import { booksApi } from '../../services/books';
+import { availabilityVariant, reservedAvailableLabel, totalCopiesLabel } from '../../utils/availability';
 import './Public.css';
 
 const makeLocationString = (book) => {
@@ -262,8 +263,11 @@ const Search = () => {
                       <p>{book.author}</p>
                       <div className="book-meta">
                         <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{book.year}</span>
-                        <span className={`badge ${book.available ? 'badge-success' : 'badge-warning'}`}>
-                          {book.available ? `${book.availableCopies} Available` : 'On Shelf'}
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                          {totalCopiesLabel(book)}
+                        </span>
+                        <span className={`badge badge-${availabilityVariant(book)}`}>
+                          {reservedAvailableLabel(book)}
                         </span>
                       </div>
                       <div className="book-location-chip">

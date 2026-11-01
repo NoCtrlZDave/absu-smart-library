@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Search, Book, Laptop, Stethoscope, Scale, Calculator, GraduationCap } from 'lucide-react';
 import { useBooks } from '../../context/useBook';
 import { BookCover } from '../../components/common';
+import { availabilityVariant, reservedAvailableLabel, totalCopiesLabel } from '../../utils/availability';
 import './Public.css';
 
 const HOME_CATEGORIES = [
@@ -103,8 +104,9 @@ const Home = () => {
                 <p>{book.author}</p>
                 <div className="book-meta">
                   <span className="book-year">{book.year}</span>
-                  <span className={`badge ${book.available ? 'badge-success' : 'badge-danger'}`}>
-                    {book.available ? 'Available' : 'Borrowed'}
+                  <span className="book-year">{totalCopiesLabel(book)}</span>
+                  <span className={`badge badge-${availabilityVariant(book)}`}>
+                    {reservedAvailableLabel(book)}
                   </span>
                 </div>
               </div>

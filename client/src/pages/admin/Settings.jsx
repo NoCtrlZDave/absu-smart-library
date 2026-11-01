@@ -1,12 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Settings2, BookOpen, Bell, Save, RefreshCw, GraduationCap } from 'lucide-react';
-import { Button, Input, Spinner, Select } from '../../components/common';
+import { Button, Input, Spinner } from '../../components/common';
 import { useToast } from '../../components/common/useToast';
 import { adminApi } from '../../services/admin';
-import {
-  ACADEMIC_SESSION_KEY,
-  buildAcademicSessionOptions,
-} from '../../utils/academic';
+import { ACADEMIC_SESSION_KEY, normalizeAcademicSession } from '../../utils/academic';
 import './Admin.css';
 
 const GROUP_LABELS = {
@@ -83,27 +80,24 @@ const Settings = () => {
     return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
   }, [defaults]);
 
-  const currentSession = values[ACADEMIC_SESSION_KEY];
-  const sessionOptions = useMemo(() => {
-    const options = buildAcademicSessionOptions();
-    if (currentSession && !options.some((option) => option.value === currentSession)) {
-      return [...options, { value: currentSession, label: currentSession }].sort(
-        (a, b) => Number(a.value.slice(0, 4)) - Number(b.value.slice(0, 4))
-      );
-    }
-    return options;
-  }, [currentSession]);
-
   const setValue = (key, value) => setValues((prev) => ({ ...prev, [key]: value }));
 
   const handleSave = async () => {
     setSaving(true);
     try {
+      const sessionValue = values[ACADEMIC_SESSION_KEY];
+      const normalizedSession = sessionValue ? normalizeAcademicSession(sessionValue) : null;
+      if (sessionValue && !normalizedSession) {
+        showToast('Enter a valid academic session in the format YYYY/YYYY, e.g. 2026/2027.', 'error');
+        return;
+      }
+      if (normalizedSession) setValue(ACADEMIC_SESSION_KEY, normalizedSession);
+
       const changed = Object.keys(values)
         .filter((key) => JSON.stringify(values[key]) !== JSON.stringify(saved[key] ?? defaults[key]))
         .map((key) => ({
           key,
-          value: values[key],
+          value: key === ACADEMIC_SESSION_KEY ? normalizedSession ?? values[key] : values[key],
           label: labelFor(key),
           category: key.split('.')[0],
         }));
@@ -175,10 +169,16 @@ const Settings = () => {
                           onChange={(e) => setValue(key, e.target.value === '' ? 0 : Number(e.target.value))}
                         />
                       ) : key === ACADEMIC_SESSION_KEY ? (
-                        <Select
+                        <Input
                           value={value ?? ''}
+                          placeholder="e.g. 2026/2027"
                           onChange={(e) => setValue(key, e.target.value)}
-                          options={sessionOptions}
+                          helper="Type the session manually, e.g. 2026/2027."
+                          error={
+                            value && !normalizeAcademicSession(value)
+                              ? 'Use the format YYYY/YYYY, e.g. 2026/2027.'
+                              : ''
+                          }
                         />
                       ) : key.includes('template') ? (
                         <Input value={value ?? ''} onChange={(e) => setValue(key, e.target.value)} />

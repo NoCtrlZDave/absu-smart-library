@@ -6,6 +6,7 @@ import { useToast } from '../../components/common/useToast';
 import { useAuth } from '../../context/useAuth';
 import { useBooks } from '../../context/useBook';
 import { reservationsApi } from '../../services/reservations';
+import { availabilityVariant, reservedAvailableLabel, totalCopiesLabel } from '../../utils/availability';
 import './Public.css';
 import '../Circulation.css';
 
@@ -17,7 +18,7 @@ const makeLocationString = (book) => {
 
 const BookDetails = () => {
   const { id } = useParams();
-  const { getBook } = useBooks();
+  const { getBook, refreshCatalog } = useBooks();
   const { user } = useAuth();
   const showToast = useToast();
   const [book, setBook] = useState(null);
@@ -43,6 +44,7 @@ const BookDetails = () => {
     try {
       await reservationsApi.create({ bookId: book.id });
       setReservationCreated(true);
+      await refreshCatalog();
       showToast('Reservation request submitted. The library will review it.', 'success');
     } catch (err) {
       showToast(err.message || 'Could not submit reservation.', 'error');
@@ -95,10 +97,8 @@ const BookDetails = () => {
           <p className="book-author">by {book.author}</p>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
-            <Badge variant={book.available ? 'success' : 'danger'}>
-              {book.available ? `${book.availableCopies} Copies Available` : `${book.totalCopies} Copies`}
-            </Badge>
-            {book.reservedCopies > 0 && <Badge variant="info">{book.reservedCopies} Reserved</Badge>}
+            <Badge variant={availabilityVariant(book)}>{reservedAvailableLabel(book)}</Badge>
+            <Badge variant="info">{totalCopiesLabel(book)} total</Badge>
             {book.borrowedCopies > 0 && <Badge variant="warning">{book.borrowedCopies} On loan</Badge>}
             {book.unavailableCopies > 0 && (
               <Badge variant="maintenance">{book.unavailableCopies} Unavailable</Badge>

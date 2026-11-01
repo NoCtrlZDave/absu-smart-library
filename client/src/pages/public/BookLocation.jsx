@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Button, BookCover, Badge } from '../../components/common';
 import { useBooks } from '../../context/useBook';
+import { availabilityVariant, reservedAvailableLabel, totalCopiesLabel } from '../../utils/availability';
 import './Public.css';
 
 const STEP_ICON = {
@@ -209,10 +210,9 @@ const BookLocation = () => {
                       {book.title} lives at {floor}, {phys.subject}
                       {phys.arrow ? ` - ${phys.arrow} side` : ''} of Pillar {phys.pillar}.
                     </p>
-                    <div style={{ marginTop: '0.75rem' }}>
-                      <Badge variant={book.available ? 'success' : 'warning'}>
-                        {book.available ? `${book.availableCopies} copies available` : `${book.totalCopies} copies`}
-                      </Badge>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.75rem' }}>
+                      <Badge variant={availabilityVariant(book)}>{reservedAvailableLabel(book)}</Badge>
+                      <Badge variant="info">{totalCopiesLabel(book)} total</Badge>
                     </div>
                   </div>
                 </div>

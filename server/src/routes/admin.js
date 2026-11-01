@@ -17,7 +17,7 @@ import {
 import { buildMatricValidator, getPolicy, ALL_ROLES, POLICY_DEFAULTS } from '../services/policies.js';
 import { ROLE_PERMISSIONS, PERMISSIONS } from '../config/permissions.js';
 import { hashActivationToken } from '../services/studentImport.js';
-import { getCurrentSession, presentUser } from '../services/academic.js';
+import { ACADEMIC_SESSION_KEY, getCurrentSession, normalizeSession, presentUser } from '../services/academic.js';
 
 const router = express.Router();
 router.use(protect, authorize('admin'));
@@ -320,6 +320,14 @@ router.put('/settings', asyncHandler(async (req, res) => {
   const { settings } = req.body;
   if (!Array.isArray(settings)) return badRequest(res, 'settings must be an array of { key, value, label, category }');
 
+  const academicSetting = settings.find((s) => s?.key === ACADEMIC_SESSION_KEY);
+  if (academicSetting && !normalizeSession(academicSetting.value)) {
+    return badRequest(
+      res,
+      'Academic session must use the format YYYY/YYYY, e.g. 2026/2027'
+    );
+  }
+
   const before = await Setting.find({ key: { $in: settings.map((s) => s?.key).filter(Boolean) } }).lean();
   const beforeMap = new Map(before.map((item) => [item.key, item.value]));
   const changes = [];
@@ -327,10 +335,11 @@ router.put('/settings', asyncHandler(async (req, res) => {
   for (const s of settings) {
     if (!s || !s.key) continue;
     const previous = beforeMap.has(s.key) ? beforeMap.get(s.key) : POLICY_DEFAULTS[s.key] ?? null;
+    const nextValue = s.key === ACADEMIC_SESSION_KEY ? normalizeSession(s.value) : s.value;
     const saved = await Setting.findOneAndUpdate(
       { key: s.key },
       {
-        value: s.value,
+        value: nextValue,
         label: s.label || s.key,
         category: s.category || 'general',
         updatedBy: req.user._id,

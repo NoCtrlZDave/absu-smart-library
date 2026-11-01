@@ -15,7 +15,8 @@ const BooksManagement = ({ basePath = '/librarian' }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [bookToDelete, setBookToDelete] = useState(null);
 
-  const statusOf = (book) => (book.availableCopies > 0 ? 'available' : 'borrowed');
+  const statusOf = (book) =>
+    (book.displayAvailableCopies ?? book.availableCopies) > 0 ? 'available' : 'borrowed';
 
   const categoryOptions = ['All', ...categories.map((c) => c.name)];
 
@@ -83,6 +84,7 @@ const BooksManagement = ({ basePath = '/librarian' }) => {
                 <th>Book</th>
                 <th>Category</th>
                 <th>Copies</th>
+                <th>Reserved</th>
                 <th>Available</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -91,7 +93,8 @@ const BooksManagement = ({ basePath = '/librarian' }) => {
             <tbody>
               {filteredBooks.map(book => {
                 const copies = book.totalCopies;
-                const available = book.availableCopies;
+                const reserved = book.displayReservedCopies ?? book.reservedCopies ?? 0;
+                const available = book.displayAvailableCopies ?? book.availableCopies;
                 const status = statusOf(book);
                 return (
                   <tr key={book.id}>
@@ -105,6 +108,7 @@ const BooksManagement = ({ basePath = '/librarian' }) => {
                     </td>
                     <td>{book.category}</td>
                     <td>{copies}</td>
+                    <td>{reserved}</td>
                     <td>{available}</td>
                     <td>
                       <span className={`badge ${status === 'available' ? 'badge-success' : 'badge-danger'}`}>

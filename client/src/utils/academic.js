@@ -7,10 +7,11 @@ export const getDefaultAcademicSession = (date = new Date()) => {
 };
 
 export const normalizeAcademicSession = (value) => {
-  const match = String(value ?? '').match(/(\d{4})/);
+  const match = String(value ?? '').trim().match(/^(\d{4})(?:\s*\/\s*(\d{4}))?$/);
   if (!match) return null;
   const start = Number(match[1]);
   if (!Number.isFinite(start) || start < 1900 || start > 2200) return null;
+  if (match[2] && Number(match[2]) !== start + 1) return null;
   return `${start}/${start + 1}`;
 };
 

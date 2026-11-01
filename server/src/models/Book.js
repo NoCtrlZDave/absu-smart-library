@@ -166,24 +166,44 @@ function buildLocationString(loc) {
   return parts.length ? parts.join(', ') : null;
 }
 
-bookSchema.methods.toCatalogueJSON = function () {
+bookSchema.methods.toCatalogueJSON = function (reservationStats = {}) {
   const obj = this.toObject();
   obj.id = this._id.toString();
-  const totalCopies = (obj.copies || []).length;
   const copies = obj.copies || [];
+  const totalCopies = copies.length;
   const countStatus = (status) => copies.filter((c) => c.status === status).length;
   const availableCopies = countStatus('available') + countStatus('verified');
   const reservedCopies = countStatus('reserved');
   const borrowedCopies = countStatus('borrowed');
+  const damagedCopies = countStatus('damaged');
+  const missingCopies = countStatus('missing');
+  const misplacedCopies = countStatus('misplaced');
+  const pendingReservations = Number(reservationStats.pending || 0);
+  const approvedReservations = Number(reservationStats.approved || 0);
+  const activeReservations = pendingReservations + approvedReservations;
+  const unavailableCopies = Math.max(
+    0,
+    totalCopies - availableCopies - reservedCopies - borrowedCopies
+  );
+  const reservableCopies = Math.max(0, totalCopies - borrowedCopies - unavailableCopies);
+  const heldCopies = Math.max(reservedCopies, approvedReservations) + pendingReservations;
+  const displayReservedCopies = Math.min(reservableCopies, heldCopies);
+  const displayAvailableCopies = Math.max(0, reservableCopies - displayReservedCopies);
+
   obj.totalCopies = totalCopies;
   obj.availableCopies = availableCopies;
   obj.reservedCopies = reservedCopies;
   obj.borrowedCopies = borrowedCopies;
-  obj.damagedCopies = countStatus('damaged');
-  obj.missingCopies = countStatus('missing');
-  obj.misplacedCopies = countStatus('misplaced');
-  obj.unavailableCopies = totalCopies - availableCopies - reservedCopies - borrowedCopies;
-  obj.available = availableCopies > 0;
+  obj.damagedCopies = damagedCopies;
+  obj.missingCopies = missingCopies;
+  obj.misplacedCopies = misplacedCopies;
+  obj.unavailableCopies = unavailableCopies;
+  obj.pendingReservations = pendingReservations;
+  obj.approvedReservations = approvedReservations;
+  obj.activeReservations = activeReservations;
+  obj.displayReservedCopies = displayReservedCopies;
+  obj.displayAvailableCopies = displayAvailableCopies;
+  obj.available = displayAvailableCopies > 0;
   obj.author = obj.authors && obj.authors.length ? obj.authors.join(', ') : 'Unknown Author';
   if (!obj.location) obj.location = { library: 'Main Library' };
   obj.locationString = obj.locationString || buildLocationString(obj.location);
