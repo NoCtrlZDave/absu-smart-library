@@ -95,8 +95,20 @@ const seedUsers = async () => {
     role: 'librarian',
     phone: '08087654321',
   });
+  const student = await User.create({
+    first_name: 'Amina',
+    last_name: 'Atu',
+    email: 'student@absu.edu.ng',
+    password: 'student123',
+    role: 'student',
+    matricNumber: '2021/131178/REGULAR',
+    department: 'Computer Science',
+    programme: 'Computer Science',
+    level: '400',
+    phone: '08034567890',
+  });
 
-  return { admin, librarian };
+  return { admin, librarian, student };
 };
 
 const STRUCTURE = {
@@ -204,11 +216,13 @@ const seed = async () => {
     await seedStructure();
     console.log('Seeding catalogue...');
     await seedBooks();
+    await seedMisc(users);
 
     console.log('Seeding complete.');
     console.log('------------------------------------');
     console.log('Admin account:    admin@absu.edu.ng / admin123');
     console.log('Librarian account: librarian@absu.edu.ng / lib123');
+    console.log('Student account:   2021/131178/REGULAR / student123');
     await mongoose.disconnect();
   } catch (err) {
     console.error('Seed failed:', err);

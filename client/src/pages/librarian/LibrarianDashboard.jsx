@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, CheckCircle, MapPin, AlertTriangle, ClipboardList } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { BookOpen, BookMarked, CheckCircle, Clock, MapPin, AlertTriangle, ClipboardList, RotateCcw } from 'lucide-react';
 import ActivityFeed from '../../components/audit/ActivityFeed';
 import { dashboardApi } from '../../services/dashboard';
 import './Librarian.css';
+import '../Circulation.css';
 
 const LibrarianDashboard = () => {
   const [data, setData] = useState(null);
@@ -22,6 +23,11 @@ const LibrarianDashboard = () => {
     { title: 'Total Books', value: data?.total_books ?? 0, icon: <BookOpen size={24} />, color: 'primary' },
     { title: 'Total Copies', value: data?.total_copies ?? 0, icon: <ClipboardList size={24} />, color: 'info' },
     { title: 'Available', value: data?.available ?? 0, icon: <CheckCircle size={24} />, color: 'success' },
+    { title: 'Reserved', value: data?.reserved ?? 0, icon: <BookMarked size={24} />, color: 'info' },
+    { title: 'On Loan', value: data?.borrowed ?? 0, icon: <RotateCcw size={24} />, color: 'warning' },
+    { title: 'Pending Requests', value: data?.pending_reservations ?? 0, icon: <BookMarked size={24} />, color: 'warning' },
+    { title: 'Ready to Collect', value: data?.approved_reservations ?? 0, icon: <CheckCircle size={24} />, color: 'success' },
+    { title: 'Overdue Loans', value: data?.overdue_loans ?? 0, icon: <Clock size={24} />, color: 'danger' },
     { title: 'Misplaced', value: data?.misplaced ?? 0, icon: <MapPin size={24} />, color: 'warning' },
     { title: 'Missing', value: data?.missing ?? 0, icon: <AlertTriangle size={24} />, color: 'danger' },
     { title: 'Damaged', value: data?.damaged ?? 0, icon: <AlertTriangle size={24} />, color: 'danger' },
@@ -31,7 +37,21 @@ const LibrarianDashboard = () => {
     <div className="librarian-page">
       <div className="page-header">
         <h1>Librarian Dashboard</h1>
-        <p>Overview of library inventory and resources.</p>
+        <p>Overview of library inventory, reservations, and circulation.</p>
+        <div className="table-actions" style={{ marginTop: '0.75rem' }}>
+          <Link to="/librarian/reservations" className="btn btn--primary">
+            <BookMarked size={16} />
+            Reservations
+          </Link>
+          <Link to="/librarian/borrowings" className="btn btn--secondary">
+            <RotateCcw size={16} />
+            Borrowings
+          </Link>
+          <Link to="/librarian/inventory" className="btn btn--outline">
+            <ClipboardList size={16} />
+            Inventory
+          </Link>
+        </div>
       </div>
 
       <div className="stats-grid">
@@ -84,7 +104,7 @@ const LibrarianDashboard = () => {
           <p className="text-muted" style={{ marginTop: '-0.5rem' }}>
             Track who changed what across the library.
           </p>
-          <ActivityFeed limit={5} linkTo="/admin/logs" />
+          <ActivityFeed limit={5} />
         </div>
       </div>
     </div>

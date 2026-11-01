@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, User, Shield, ShieldOff } from 'lucide-react';
+import { Search, Shield, ShieldOff } from 'lucide-react';
 import { Input, Select, Badge } from '../../components/common';
 import { useAudit } from '../../context/useAudit';
 import { adminApi } from '../../services/admin';
@@ -14,24 +14,27 @@ const UserManagement = () => {
   const [statusFilter, setStatusFilter] = useState('All');
 
   useEffect(() => {
-    fetchUsers();
-  }, [search, roleFilter, statusFilter]);
+    let mounted = true;
 
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const params = { limit: 100 };
-      if (search) params.search = search;
-      if (roleFilter !== 'All') params.role = roleFilter.toLowerCase();
-      if (statusFilter !== 'All') params.status = statusFilter.toLowerCase();
-      const data = await adminApi.users(params);
-      setUsers(data.items || []);
-    } catch (err) {
-      console.error('Failed to load users:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const params = { limit: 100 };
+        if (search) params.search = search;
+        if (roleFilter !== 'All') params.role = roleFilter.toLowerCase();
+        if (statusFilter !== 'All') params.status = statusFilter.toLowerCase();
+        const data = await adminApi.users(params);
+        if (mounted) setUsers(data.items || []);
+      } catch (err) {
+        console.error('Failed to load users:', err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    fetchUsers();
+    return () => { mounted = false; };
+  }, [search, roleFilter, statusFilter]);
 
   const toggleUserStatus = async (user) => {
     try {
@@ -50,13 +53,13 @@ const UserManagement = () => {
     <div className="admin-page">
       <div className="page-header">
         <h1>User Management</h1>
-        <p>Manage administrators and librarians.</p>
+        <p>Manage students, librarians, and administrators.</p>
       </div>
 
       <div className="toolbar">
         <div className="toolbar-left">
           <Input
-            placeholder="Search by name or email..."
+            placeholder="Search by name, email, or matric number..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             icon={Search}
@@ -65,6 +68,7 @@ const UserManagement = () => {
             <option value="All">All Roles</option>
             <option value="admin">Admin</option>
             <option value="librarian">Librarian</option>
+            <option value="student">Student</option>
           </Select>
           <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="All">All Status</option>
@@ -100,14 +104,26 @@ const UserManagement = () => {
                       <div>
                         <strong style={{ color: 'var(--text)' }}>{user.first_name} {user.last_name}</strong>
                         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-                          {user.email}
+                          {user.matricNumber || user.email}
                         </p>
                       </div>
                     </div>
                   </td>
                   <td>
-                    <Badge variant={user.role === 'admin' ? 'danger' : 'warning'}>
-                      {user.role === 'admin' ? 'Administrator' : 'Librarian'}
+                    <Badge
+                      variant={
+                        user.role === 'admin'
+                          ? 'danger'
+                          : user.role === 'student'
+                          ? 'success'
+                          : 'warning'
+                      }
+                    >
+                      {user.role === 'admin'
+                        ? 'Administrator'
+                        : user.role === 'student'
+                        ? 'Student'
+                        : 'Librarian'}
                     </Badge>
                   </td>
                   <td>

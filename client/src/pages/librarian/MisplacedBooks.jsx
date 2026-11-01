@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MapPin, CheckCircle, ArrowRight } from 'lucide-react';
-import { Button, Badge } from '../../components/common';
+import { Button } from '../../components/common';
 import { useToast } from '../../components/common/useToast';
 import { useAudit } from '../../context/useAudit';
 import { inventoryApi } from '../../services/inventory';
@@ -27,7 +27,7 @@ const MisplacedBooks = () => {
     };
     load();
     return () => { mounted = false; };
-  }, []);
+  }, [showToast]);
 
   const handleResolve = async (id) => {
     setResolvingId(id);

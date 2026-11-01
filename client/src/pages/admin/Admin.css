@@ -988,3 +988,14 @@
 .level-breakdown-fill.info { background: var(--info); }
 .level-breakdown-fill.warning { background: var(--warning); }
 .level-breakdown-fill.danger { background: var(--danger); }
+
+.card-subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.import-dropzone--active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}

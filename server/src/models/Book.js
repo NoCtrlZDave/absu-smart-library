@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { getPhysicalLocation, getLocationByCategory, deriveLocationFromCategory } from '../services/locationMapper.js';
+import { generateAccessionNumber } from '../services/accessions.js';
 import StructureNode from './StructureNode.js';
 
 const escapeRegExp = (value) => String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -66,6 +67,7 @@ const bookSchema = new mongoose.Schema(
     year: { type: Number, default: null },
     category: { type: String, default: 'General', index: true },
     department: { type: String, default: null },
+    ddcNumber: { type: String, default: null, index: true },
     description: { type: String, default: null },
     subjects: [{ type: String, trim: true }],
     keywords: [{ type: String, trim: true }],
@@ -107,6 +109,12 @@ bookSchema.index({ title: 'text', publisher: 'text' });
 
 bookSchema.pre('save', async function (next) {
   for (const copy of this.copies || []) {
+    if (!copy.accessionNumber) {
+      copy.accessionNumber = await generateAccessionNumber();
+    }
+    if (!copy.code) {
+      copy.code = copy.accessionNumber;
+    }
     const copyLoc = copy.location || {};
     if (!copyLoc.rack && !copyLoc.shelf && !copyLoc.floor && !copyLoc.section) {
       const byCall = getPhysicalLocation(copy.callNumber);
@@ -162,9 +170,19 @@ bookSchema.methods.toCatalogueJSON = function () {
   const obj = this.toObject();
   obj.id = this._id.toString();
   const totalCopies = (obj.copies || []).length;
-  const availableCopies = (obj.copies || []).filter((c) => c.status === 'available').length;
+  const copies = obj.copies || [];
+  const countStatus = (status) => copies.filter((c) => c.status === status).length;
+  const availableCopies = countStatus('available') + countStatus('verified');
+  const reservedCopies = countStatus('reserved');
+  const borrowedCopies = countStatus('borrowed');
   obj.totalCopies = totalCopies;
   obj.availableCopies = availableCopies;
+  obj.reservedCopies = reservedCopies;
+  obj.borrowedCopies = borrowedCopies;
+  obj.damagedCopies = countStatus('damaged');
+  obj.missingCopies = countStatus('missing');
+  obj.misplacedCopies = countStatus('misplaced');
+  obj.unavailableCopies = totalCopies - availableCopies - reservedCopies - borrowedCopies;
   obj.available = availableCopies > 0;
   obj.author = obj.authors && obj.authors.length ? obj.authors.join(', ') : 'Unknown Author';
   if (!obj.location) obj.location = { library: 'Main Library' };

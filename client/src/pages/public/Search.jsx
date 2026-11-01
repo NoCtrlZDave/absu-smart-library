@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search as SearchIcon, Filter, BookOpen, MapPin, SlidersHorizontal } from 'lucide-react';
+import {
+  Search as SearchIcon,
+  Filter,
+  BookOpen,
+  MapPin,
+  SlidersHorizontal,
+  X,
+} from 'lucide-react';
 import { Button, Pagination, BookCover } from '../../components/common';
 import { booksApi } from '../../services/books';
 import './Public.css';
@@ -24,10 +31,14 @@ const Search = () => {
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [inputValue, setInputValue] = useState(searchParams.get('q') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All Categories');
+  const [selectedDepartment, setSelectedDepartment] = useState(searchParams.get('department') || 'All Departments');
+  const [selectedAvailability, setSelectedAvailability] = useState(searchParams.get('availability') || 'All');
+  const [selectedYear, setSelectedYear] = useState(searchParams.get('year') || 'All Years');
+  const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'relevance');
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [books, setBooks] = useState([]);
-  const [facets, setFacets] = useState({ categories: [], total: 0 });
+  const [facets, setFacets] = useState({ categories: [], departments: [], years: [], total: 0 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const booksPerPage = 9;
@@ -37,6 +48,10 @@ const Search = () => {
     const params = {};
     if (query.trim()) params.q = query.trim();
     if (selectedCategory !== 'All Categories') params.category = selectedCategory;
+    if (selectedDepartment !== 'All Departments') params.department = selectedDepartment;
+    if (selectedAvailability !== 'All') params.availability = selectedAvailability.toLowerCase();
+    if (selectedYear !== 'All Years') params.year = selectedYear;
+    params.sort = sortBy;
     params.page = currentPage;
     params.limit = booksPerPage;
 
@@ -48,7 +63,7 @@ const Search = () => {
       .then((data) => {
         if (!mounted) return;
         setBooks(data.books || []);
-        setFacets(data.facets || { categories: [], total: 0 });
+        setFacets(data.facets || { categories: [], departments: [], years: [], total: 0 });
       })
       .catch((err) => {
         if (mounted) setError(err.message);
@@ -58,13 +73,33 @@ const Search = () => {
       });
 
     return () => { mounted = false; };
-  }, [query, selectedCategory, currentPage]);
+  }, [query, selectedCategory, selectedDepartment, selectedAvailability, selectedYear, sortBy, currentPage, setSearchParams]);
 
   const categoryOptions = ['All Categories', ...(facets.categories || []).map((c) => c.name)];
+  const departmentOptions = ['All Departments', ...(facets.departments || []).map((d) => d.name || d)];
+  const yearOptions = ['All Years', ...(facets.years || []).map((y) => String(y.year || y.name))];
+  const availabilityOptions = ['All', 'Available', 'Borrowed'];
+  const sortOptions = [
+    { value: 'relevance', label: 'Relevance' },
+    { value: 'title', label: 'Title (A-Z)' },
+    { value: 'author', label: 'Author (A-Z)' },
+    { value: 'year', label: 'Year (Newest)' },
+  ];
 
   const handleSearch = (e) => {
     e.preventDefault();
     setQuery(inputValue.trim());
+    setCurrentPage(1);
+  };
+
+  const clearFilters = () => {
+    setQuery('');
+    setInputValue('');
+    setSelectedCategory('All Categories');
+    setSelectedDepartment('All Departments');
+    setSelectedAvailability('All');
+    setSelectedYear('All Years');
+    setSortBy('relevance');
     setCurrentPage(1);
   };
 
@@ -96,11 +131,26 @@ const Search = () => {
       </div>
 
       <div className="search-content">
+        <div
+          className={`filters-backdrop ${showFilters ? 'show' : ''}`}
+          onClick={() => setShowFilters(false)}
+          aria-hidden="true"
+        />
         <aside className={`filters-sidebar ${showFilters ? 'show' : ''}`}>
-          <h3>
-            <Filter size={18} />
-            Filters
-          </h3>
+          <div className="filters-sidebar-header">
+            <h3>
+              <Filter size={18} />
+              Filters
+            </h3>
+            <button
+              type="button"
+              className="filters-close-btn"
+              onClick={() => setShowFilters(false)}
+              aria-label="Close filters"
+            >
+              <X size={20} />
+            </button>
+          </div>
 
           <div className="filter-group">
             <h4>Category</h4>
@@ -110,16 +160,76 @@ const Search = () => {
                   type="radio"
                   name="category"
                   checked={selectedCategory === cat}
-                  onChange={() => { setSelectedCategory(cat); setCurrentPage(1); }}
+                  onChange={() => { setSelectedCategory(cat); setCurrentPage(1); setShowFilters(false); }}
                 />
                 {cat} {cat !== 'All Categories' && `(${facets.categories?.find((c) => c.name === cat)?.count ?? ''})`}
               </label>
             ))}
           </div>
 
-          <Button variant="outline" onClick={() => { setSelectedCategory('All Categories'); setQuery(''); setInputValue(''); setCurrentPage(1); }} style={{ width: '100%' }}>
+          <Button variant="outline" onClick={clearFilters} style={{ width: '100%' }}>
             Clear Filters
           </Button>
+
+          <div className="filter-group">
+            <h4>Department</h4>
+            {departmentOptions.map(dept => (
+              <label key={dept} className="filter-option">
+                <input
+                  type="radio"
+                  name="department"
+                  checked={selectedDepartment === dept}
+                  onChange={() => { setSelectedDepartment(dept); setCurrentPage(1); setShowFilters(false); }}
+                />
+                {dept}
+              </label>
+            ))}
+          </div>
+
+          <div className="filter-group">
+            <h4>Availability</h4>
+            {availabilityOptions.map(avail => (
+              <label key={avail} className="filter-option">
+                <input
+                  type="radio"
+                  name="availability"
+                  checked={selectedAvailability === avail}
+                  onChange={() => { setSelectedAvailability(avail); setCurrentPage(1); setShowFilters(false); }}
+                />
+                {avail}
+              </label>
+            ))}
+          </div>
+
+          <div className="filter-group">
+            <h4>Publication Year</h4>
+            {yearOptions.map(year => (
+              <label key={year} className="filter-option">
+                <input
+                  type="radio"
+                  name="year"
+                  checked={selectedYear === year}
+                  onChange={() => { setSelectedYear(year); setCurrentPage(1); setShowFilters(false); }}
+                />
+                {year}
+              </label>
+            ))}
+          </div>
+
+          <div className="filter-group">
+            <h4>Sort By</h4>
+            {sortOptions.map(opt => (
+              <label key={opt.value} className="filter-option">
+                <input
+                  type="radio"
+                  name="sort"
+                  checked={sortBy === opt.value}
+                  onChange={() => { setSortBy(opt.value); setCurrentPage(1); setShowFilters(false); }}
+                />
+                {opt.label}
+              </label>
+            ))}
+          </div>
         </aside>
 
         <div className="search-results">

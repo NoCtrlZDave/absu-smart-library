@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Calendar, Hash, Building, Tag, ArrowLeft, BookOpen, Layers, FileText, Stamp, List, Milestone } from 'lucide-react';
+import { MapPin, Calendar, Hash, Building, Tag, ArrowLeft, BookOpen, BookMarked, Layers, FileText, Stamp, List, Milestone, LogIn } from 'lucide-react';
 import { Button, Badge, BookCover } from '../../components/common';
+import { useToast } from '../../components/common/useToast';
+import { useAuth } from '../../context/useAuth';
 import { useBooks } from '../../context/useBook';
+import { reservationsApi } from '../../services/reservations';
 import './Public.css';
+import '../Circulation.css';
 
 const makeLocationString = (book) => {
   const loc = book.location || {};
@@ -14,8 +18,12 @@ const makeLocationString = (book) => {
 const BookDetails = () => {
   const { id } = useParams();
   const { getBook } = useBooks();
+  const { user } = useAuth();
+  const showToast = useToast();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [reserving, setReserving] = useState(false);
+  const [reservationCreated, setReservationCreated] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -29,6 +37,19 @@ const BookDetails = () => {
       mounted = false;
     };
   }, [id, getBook]);
+
+  const handleReserve = async () => {
+    setReserving(true);
+    try {
+      await reservationsApi.create({ bookId: book.id });
+      setReservationCreated(true);
+      showToast('Reservation request submitted. The library will review it.', 'success');
+    } catch (err) {
+      showToast(err.message || 'Could not submit reservation.', 'error');
+    } finally {
+      setReserving(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -73,9 +94,16 @@ const BookDetails = () => {
           <h1>{book.title}</h1>
           <p className="book-author">by {book.author}</p>
 
-          <Badge variant={book.available ? 'success' : 'danger'} style={{ marginBottom: '1.5rem' }}>
-            {book.available ? `${book.availableCopies} Copies Available` : `${book.totalCopies} Copies`}
-          </Badge>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
+            <Badge variant={book.available ? 'success' : 'danger'}>
+              {book.available ? `${book.availableCopies} Copies Available` : `${book.totalCopies} Copies`}
+            </Badge>
+            {book.reservedCopies > 0 && <Badge variant="info">{book.reservedCopies} Reserved</Badge>}
+            {book.borrowedCopies > 0 && <Badge variant="warning">{book.borrowedCopies} On loan</Badge>}
+            {book.unavailableCopies > 0 && (
+              <Badge variant="maintenance">{book.unavailableCopies} Unavailable</Badge>
+            )}
+          </div>
 
           <div className="book-meta-grid">
             <div className="meta-item">
@@ -279,13 +307,45 @@ const BookDetails = () => {
           )}
 
           <div className="book-actions">
+            {user?.role === 'student' && !reservationCreated && (
+              <Button
+                onClick={handleReserve}
+                loading={reserving}
+                disabled={!book.totalCopies}
+              >
+                <BookMarked size={18} />
+                {book.totalCopies ? 'Reserve this book' : 'No copies to reserve'}
+              </Button>
+            )}
+            {user?.role === 'student' && reservationCreated && (
+              <Link to="/student/reservations">
+                <Button variant="success">
+                  <BookMarked size={18} />
+                  View reservation status
+                </Button>
+              </Link>
+            )}
+            {!user && book.totalCopies > 0 && (
+              <Link to={`/login?redirect=/books/${book.id}`}>
+                <Button variant="secondary">
+                  <LogIn size={18} />
+                  Sign in to reserve
+                </Button>
+              </Link>
+            )}
             <Link to={`/books/${book.id}/location`}>
-              <Button>
+              <Button variant={user?.role === 'student' ? 'outline' : 'primary'}>
                 <MapPin size={18} />
                 See Exact Location
               </Button>
             </Link>
           </div>
+          {user?.role === 'student' && (
+            <p className="inline-note" style={{ marginTop: '1rem', marginBottom: 0 }}>
+              A reservation request does not reduce available copies. A librarian must approve it
+              and assign a physical copy before collection.
+            </p>
+          )}
         </div>
       </div>
     </div>

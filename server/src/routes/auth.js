@@ -6,6 +6,8 @@ import { protect } from '../middleware/auth.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import { ok, badRequest, notFound, unauthorized } from '../utils/responses.js';
 import logActivity from '../utils/audit.js';
+import { hashActivationToken } from '../services/studentImport.js';
+import { getCurrentSession, presentUser } from '../services/academic.js';
 
 const router = express.Router();
 
@@ -24,33 +26,50 @@ const validate = (req, res, next) => {
 
 router.post(
   '/login',
-  [body('identifier').notEmpty().withMessage('Email is required'), body('password').notEmpty().withMessage('Password is required')],
+  [
+    body('identifier').notEmpty().withMessage('Email or matric number is required'),
+    body('password').notEmpty().withMessage('Password is required'),
+  ],
   validate,
   asyncHandler(async (req, res) => {
     const { password } = req.body;
-    const identifier = String(req.body.identifier || '').trim().toLowerCase();
+    const identifier = String(req.body.identifier || '').trim();
+    const isEmail = identifier.includes('@');
 
-    const user = await User.findOne({ email: identifier });
+    const user = await User.findOne(
+      isEmail
+        ? { email: identifier.toLowerCase() }
+        : {
+            $or: [
+              { matricNumber: identifier.toUpperCase() },
+              { staffId: identifier.toUpperCase() },
+            ],
+          }
+    );
 
     if (!user || !(await user.comparePassword(password))) {
-      return unauthorized(res, 'Invalid email or password');
+      return unauthorized(res, 'Invalid email, matriculation number, staff ID, or password');
     }
     if (!user.isActive) return unauthorized(res, 'Account is not active or has been rejected');
-    if (user.role !== 'admin' && user.role !== 'librarian') {
-      return unauthorized(res, 'Only administrators and librarians can sign in');
-    }
+
+    user.lastLoginAt = new Date();
+    await user.save({ validateBeforeSave: false });
 
     const token = signToken(user);
     await logActivity({ actor: user, action: 'USER_LOGIN', entity: 'User', entityId: user._id });
 
-    return ok(res, { user: user.toSafeJSON(), token }, 'Login successful');
+    const session = await getCurrentSession();
+    return ok(res, { user: presentUser(user, session), token }, 'Login successful');
   })
 );
 
 router.get(
   '/me',
   protect,
-  asyncHandler(async (req, res) => ok(res, req.user.toSafeJSON(), 'Authenticated user'))
+  asyncHandler(async (req, res) => {
+    const session = await getCurrentSession();
+    return ok(res, presentUser(req.user, session), 'Authenticated user');
+  })
 );
 
 router.put(
@@ -72,7 +91,8 @@ router.put(
 
     await user.save();
     await logActivity({ actor: user, action: 'PROFILE_UPDATED', entity: 'User', entityId: user._id });
-    return ok(res, user.toSafeJSON(), 'Profile updated');
+    const session = await getCurrentSession();
+    return ok(res, presentUser(user, session), 'Profile updated');
   })
 );
 
@@ -94,9 +114,11 @@ router.post(
     }
 
     user.password = newPassword;
+    user.mustChangePassword = false;
     await user.save();
     await logActivity({ actor: user, action: 'PASSWORD_CHANGED', entity: 'User', entityId: user._id });
-    return ok(res, user.toSafeJSON(), 'Password updated');
+    const session = await getCurrentSession();
+    return ok(res, presentUser(user, session), 'Password updated');
   })
 );
 
@@ -112,10 +134,62 @@ router.post(
   })
 );
 
+router.get('/activation/:token', asyncHandler(async (req, res) => {
+  const tokenHash = hashActivationToken(req.params.token);
+  const user = await User.findOne({ activationToken: tokenHash }).select(
+    '+activationToken +activationExpiresAt'
+  );
+
+  if (!user) return notFound(res, 'This activation link is invalid');
+  if (user.isActive) return badRequest(res, 'This account has already been activated');
+  if (user.activationExpiresAt && user.activationExpiresAt < new Date()) {
+    return badRequest(res, 'This activation link has expired. Contact the library administrator.');
+  }
+
+  return ok(
+    res,
+    {
+      first_name: user.first_name,
+      last_name: user.last_name,
+      matricNumber: user.matricNumber,
+      email: user.email,
+      expiresAt: user.activationExpiresAt,
+    },
+    'Activation link is valid'
+  );
+}));
+
+router.post('/activate', asyncHandler(async (req, res) => {
+  const token = String(req.body.token || '').trim();
+  const password = String(req.body.password || '');
+  if (!token) return badRequest(res, 'Activation token is required');
+  if (password.length < 8) return badRequest(res, 'Password must be at least 8 characters');
+
+  const user = await User.findOne({ activationToken: hashActivationToken(token) }).select(
+    '+activationToken +activationExpiresAt'
+  );
+  if (!user) return badRequest(res, 'This activation link is invalid');
+  if (user.isActive) return badRequest(res, 'This account has already been activated');
+  if (user.activationExpiresAt && user.activationExpiresAt < new Date()) {
+    return badRequest(res, 'This activation link has expired. Contact the library administrator.');
+  }
+
+  user.password = password;
+  user.isActive = true;
+  user.activationToken = null;
+  user.activationExpiresAt = null;
+  await user.save();
+
+  await logActivity({ actor: user, action: 'ACCOUNT_ACTIVATED', entity: 'User', entityId: user._id });
+  const session = await getCurrentSession();
+  return ok(res, presentUser(user, session), 'Account activated. You can now sign in.');
+}));
+
 router.get('/:id', protect, asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) return notFound(res, 'User not found');
-  return ok(res, user.toSafeJSON());
+  const session = await getCurrentSession();
+  return ok(res, presentUser(user, session));
 }));
 
 export default router;

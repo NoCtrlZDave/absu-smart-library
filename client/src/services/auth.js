@@ -7,6 +7,8 @@ export const authApi = {
   changePassword: ({ currentPassword, newPassword }) =>
     api.post('/auth/change-password', { currentPassword, newPassword }),
   forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+  validateActivation: (token) => api.get(`/auth/activation/${token}`),
+  activate: (token, password) => api.post('/auth/activate', { token, password }),
 };
 
 export default authApi;

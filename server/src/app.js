@@ -13,6 +13,10 @@ import dashboardRoutes from './routes/dashboard.js';
 import inventoryRoutes from './routes/inventory.js';
 import reportRoutes from './routes/reports.js';
 import adminRoutes from './routes/admin.js';
+import reservationRoutes from './routes/reservations.js';
+import borrowingRoutes from './routes/borrowings.js';
+import notificationRoutes from './routes/notifications.js';
+import fineRoutes from './routes/fines.js';
 
 import { notFound, errorHandler } from './middleware/error.js';
 
@@ -43,6 +47,10 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/reservations', reservationRoutes);
+app.use('/api/borrowings', borrowingRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/fines', fineRoutes);
 
 const clientDist = path.resolve(__dirname, '../../client/dist');
 if (process.env.NODE_ENV === 'production' && fs.existsSync(clientDist)) {

@@ -7,6 +7,9 @@ export const booksApi = {
   create: (payload) => api.post('/books', payload),
   update: (id, payload) => api.put(`/books/${id}`, payload),
   remove: (id) => api.delete(`/books/${id}`),
+  importTemplateUrl: () => '/books/import/template',
+  previewImport: (rows) => api.post('/books/import/preview', { rows }),
+  importBooks: (rows) => api.post('/books/import', { rows }),
   uploadCover: (id, file) => {
     const form = new FormData();
     form.append('cover', file);

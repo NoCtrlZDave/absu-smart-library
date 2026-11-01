@@ -7,7 +7,10 @@ import {
   Lock,
   Save,
   Shield,
+  GraduationCap,
+  Building2,
 } from 'lucide-react';
+import { formatLevel } from '../utils/academic';
 import { Button, Input } from '../components/common';
 import { useAuth } from '../context/useAuth';
 import { useToast } from '../components/common/useToast';
@@ -136,6 +139,8 @@ const ProfilePage = () => {
       ? 'Administrator'
       : user?.role === 'librarian'
       ? 'Librarian'
+      : user?.role === 'student'
+      ? 'Student'
       : user?.role || '';
 
   return (
@@ -210,11 +215,11 @@ const ProfilePage = () => {
                 error={profileErrors.email}
               />
             </div>
-            {user?.matric_number && (
+            {user?.matricNumber && (
               <div className="form-group">
                 <label>Matric Number</label>
                 <Input
-                  value={user.matric_number}
+                  value={user.matricNumber}
                   icon={Hash}
                   disabled
                 />
@@ -239,9 +244,40 @@ const ProfilePage = () => {
         </form>
       </div>
 
+      {user?.role === 'student' && (
+        <div className="profile-card">
+          <h3 style={{ marginBottom: '1.5rem', color: 'var(--text)' }}>
+            <GraduationCap size={18} style={{ verticalAlign: 'middle', marginRight: 8 }} />
+            Academic Information
+          </h3>
+          <div className="form-grid">
+            <div className="form-group">
+              <label>Level</label>
+              <Input
+                value={formatLevel(user?.academicLevel || user?.level)}
+                icon={GraduationCap}
+                disabled
+              />
+            </div>
+            <div className="form-group">
+              <label>Department</label>
+              <Input value={user?.department || 'Not set'} disabled />
+            </div>
+            <div className="form-group">
+              <label>Faculty</label>
+              <Input value={user?.faculty || 'Not set'} icon={Building2} disabled />
+            </div>
+            <div className="form-group">
+              <label>Academic Session</label>
+              <Input value={user?.academicSession || 'Not set'} disabled />
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="profile-card">
         <h3 style={{ marginBottom: '1.5rem', color: 'var(--text)' }}>
-          <Shield size={18} style={{ verticalAlign: 'middle', marginRight: 8 }} />
+          <Shield size={18} style={{ verticalAlign: 'middle', marginRight: '8px' }} />
           Change Password
         </h3>
         {generalError && (

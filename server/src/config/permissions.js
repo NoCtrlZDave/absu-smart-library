@@ -1,0 +1,114 @@
+export const PERMISSIONS = {
+  CATALOGUE_VIEW: 'catalogue.view',
+  CATALOGUE_MANAGE: 'catalogue.manage',
+  CATALOGUE_IMPORT: 'catalogue.import',
+  CIRCULATION_ISSUE: 'circulation.issue',
+  CIRCULATION_RETURN: 'circulation.return',
+  CIRCULATION_RENEW: 'circulation.renew',
+  RESERVATION_VIEW: 'reservation.view',
+  RESERVATION_CREATE: 'reservation.create',
+  RESERVATION_APPROVE: 'reservation.approve',
+  RESERVATION_REJECT: 'reservation.reject',
+  INVENTORY_VIEW: 'inventory.view',
+  INVENTORY_MANAGE: 'inventory.manage',
+  INVENTORY_VERIFY: 'inventory.verify',
+  FINES_VIEW: 'fines.view',
+  FINES_PAY: 'fines.pay',
+  FINES_MANAGE: 'fines.manage',
+  REPORTS_VIEW: 'reports.view',
+  REPORTS_DEPARTMENTAL: 'reports.departmental',
+  USERS_MANAGE: 'users.manage',
+  SETTINGS_MANAGE: 'settings.manage',
+  AUDIT_VIEW: 'audit.view',
+  SYSTEM_MONITOR: 'system.monitor',
+  NOTIFICATIONS_MANAGE: 'notifications.manage',
+};
+
+const ALL_PERMISSIONS = Object.values(PERMISSIONS);
+
+export const ROLE_PERMISSIONS = {
+  admin: ALL_PERMISSIONS,
+  it_librarian: [
+    PERMISSIONS.CATALOGUE_VIEW,
+    PERMISSIONS.RESERVATION_VIEW,
+    PERMISSIONS.RESERVATION_APPROVE,
+    PERMISSIONS.RESERVATION_REJECT,
+    PERMISSIONS.INVENTORY_VIEW,
+    PERMISSIONS.INVENTORY_MANAGE,
+    PERMISSIONS.INVENTORY_VERIFY,
+    PERMISSIONS.REPORTS_VIEW,
+    PERMISSIONS.REPORTS_DEPARTMENTAL,
+    PERMISSIONS.AUDIT_VIEW,
+    PERMISSIONS.SYSTEM_MONITOR,
+  ],
+  librarian: [
+    PERMISSIONS.CATALOGUE_VIEW,
+    PERMISSIONS.CATALOGUE_MANAGE,
+    PERMISSIONS.CATALOGUE_IMPORT,
+    PERMISSIONS.CIRCULATION_ISSUE,
+    PERMISSIONS.CIRCULATION_RETURN,
+    PERMISSIONS.CIRCULATION_RENEW,
+    PERMISSIONS.RESERVATION_VIEW,
+    PERMISSIONS.RESERVATION_APPROVE,
+    PERMISSIONS.RESERVATION_REJECT,
+    PERMISSIONS.INVENTORY_VIEW,
+    PERMISSIONS.INVENTORY_MANAGE,
+    PERMISSIONS.INVENTORY_VERIFY,
+    PERMISSIONS.FINES_VIEW,
+    PERMISSIONS.FINES_PAY,
+    PERMISSIONS.FINES_MANAGE,
+    PERMISSIONS.REPORTS_VIEW,
+    PERMISSIONS.REPORTS_DEPARTMENTAL,
+    PERMISSIONS.AUDIT_VIEW,
+  ],
+  assistant_librarian: [
+    PERMISSIONS.CATALOGUE_VIEW,
+    PERMISSIONS.CATALOGUE_MANAGE,
+    PERMISSIONS.CIRCULATION_ISSUE,
+    PERMISSIONS.CIRCULATION_RETURN,
+    PERMISSIONS.CIRCULATION_RENEW,
+    PERMISSIONS.RESERVATION_VIEW,
+    PERMISSIONS.RESERVATION_APPROVE,
+    PERMISSIONS.RESERVATION_REJECT,
+    PERMISSIONS.INVENTORY_VIEW,
+    PERMISSIONS.INVENTORY_VERIFY,
+    PERMISSIONS.FINES_VIEW,
+    PERMISSIONS.REPORTS_VIEW,
+  ],
+  circulation_staff: [
+    PERMISSIONS.CATALOGUE_VIEW,
+    PERMISSIONS.CIRCULATION_ISSUE,
+    PERMISSIONS.CIRCULATION_RETURN,
+    PERMISSIONS.CIRCULATION_RENEW,
+    PERMISSIONS.RESERVATION_VIEW,
+    PERMISSIONS.INVENTORY_VIEW,
+    PERMISSIONS.FINES_VIEW,
+    PERMISSIONS.FINES_PAY,
+  ],
+  student: [
+    PERMISSIONS.CATALOGUE_VIEW,
+    PERMISSIONS.RESERVATION_CREATE,
+  ],
+  staff: [
+    PERMISSIONS.CATALOGUE_VIEW,
+    PERMISSIONS.RESERVATION_CREATE,
+  ],
+  guest: [PERMISSIONS.CATALOGUE_VIEW],
+  visitor: [PERMISSIONS.CATALOGUE_VIEW],
+};
+
+export const permissionsForUser = (user) => {
+  if (!user) return [];
+  const base = ROLE_PERMISSIONS[user.role] || [];
+  const extra = Array.isArray(user.permissions) ? user.permissions : [];
+  return Array.from(new Set([...base, ...extra]));
+};
+
+export const userHasPermission = (user, permission) => {
+  if (!user) return false;
+  if (user.role === 'admin') return true;
+  return permissionsForUser(user).includes(permission);
+};
+
+export const userHasAnyPermission = (user, permissions = []) =>
+  permissions.some((permission) => userHasPermission(user, permission));

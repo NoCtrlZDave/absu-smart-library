@@ -1,26 +1,8 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useAuth } from './useAuth';
 import { AuditContext } from './AuditContext';
 
-const AUDIT_KEY = 'absu_audit_log';
 const MAX_ENTRIES = 300;
-
-const loadJSON = (key, fallback) => {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-};
-
-const storageWrite = (key, value) => {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // localStorage unavailable — keep state in memory only.
-  }
-};
 
 const getActorName = (user) => {
   if (!user) return 'System';
@@ -35,14 +17,7 @@ const getActorName = (user) => {
 export const AuditProvider = ({ children }) => {
   const { user } = useAuth();
 
-  const [activities, setActivities] = useState(() => {
-    const saved = loadJSON(AUDIT_KEY, null);
-    return Array.isArray(saved) ? saved : [];
-  });
-
-  useEffect(() => {
-    storageWrite(AUDIT_KEY, activities);
-  }, [activities]);
+  const [activities, setActivities] = useState([]);
 
   const audit = useCallback(
     (action, entity, description) => {
