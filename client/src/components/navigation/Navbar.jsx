@@ -111,7 +111,7 @@ function Navbar({ user = null, onLogout }) {
           <img src={absuLogo} alt="ABSU logo" className="navbar__brand-logo" />
           <span className="navbar__brand-text">
             ABSU
-            <span className="navbar__brand-sub">Smart Library</span>
+              <span className="navbar__brand-sub">Digital Library</span>
           </span>
         </Link>
 

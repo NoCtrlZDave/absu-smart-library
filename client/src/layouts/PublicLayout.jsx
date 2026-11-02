@@ -19,10 +19,10 @@ function PublicLayout() {
           <div className="footer__brand">
             <span className="footer__brand-name">
               <img src={absuLogo} alt="ABSU logo" className="footer__brand-logo" />
-              ABSU Smart Library
+              ABSU Digital Library
             </span>
             <p className="footer__brand-desc">
-              A smart library book search and shelf management system
+              A digital library book search and shelf management system
               for Abia State University.
             </p>
           </div>
@@ -49,7 +49,7 @@ function PublicLayout() {
         </div>
 
         <div className="footer__bottom">
-          <span>&copy; {new Date().getFullYear()} ABSU Smart Library. All rights reserved.</span>
+          <span>&copy; {new Date().getFullYear()} ABSU Digital Library. All rights reserved.</span>
           <span>Abia State University</span>
         </div>
       </footer>

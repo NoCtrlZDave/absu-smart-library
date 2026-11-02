@@ -121,7 +121,7 @@ const Login = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-logo">
-          <h1>ABSU Smart Library</h1>
+            <h1>ABSU Digital Library</h1>
           <p>Sign in with your matriculation number or email.</p>
         </div>
 
