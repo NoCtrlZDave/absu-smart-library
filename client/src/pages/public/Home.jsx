@@ -36,7 +36,7 @@ const Home = () => {
     <div className="home-page">
       <section className="hero-section">
         <div className="hero-content">
-          <span className="hero-eyebrow">Abia State University · Smart Library</span>
+          <span className="hero-eyebrow">Abia State University - Digital Library</span>
           <h1>
             Find any book.
             <br />
@@ -125,7 +125,7 @@ const Home = () => {
           <div className="step-card">
             <div className="step-number">1</div>
             <h3>Search & Discover</h3>
-            <p>Use our smart search to find books by title, author, ISBN, or browse by category.</p>
+            <p>Use our digital search to find books by title, author, ISBN, or browse by category.</p>
           </div>
           <div className="step-card">
             <div className="step-number">2</div>
