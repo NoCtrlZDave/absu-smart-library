@@ -20,7 +20,7 @@ const buildSlots = (mapData) => {
   const holes = [];
 
   if (media.entrance) {
-    holes.push({ key: 'entrance', kind: 'entrance', label: 'Main Entrance', caption: media.entrance.caption || 'ABSU Library main entrance', image: media.entrance.image || '' });
+    holes.push({ key: 'entrance', kind: 'entrance', label: 'Main Entrance', caption: media.entrance.caption || 'ABSU Digital Library main entrance', image: media.entrance.image || '' });
   }
 
   Object.entries(media.floors || {}).forEach(([num, val]) => {
