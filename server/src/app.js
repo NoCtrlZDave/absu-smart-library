@@ -25,9 +25,36 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+const getAllowedOrigins = () => {
+  const clientOrigin = process.env.CLIENT_ORIGIN;
+  if (!clientOrigin) return ['*'];
+  
+  const origins = clientOrigin
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean);
+    
+  return origins.length > 0 ? origins : ['*'];
+};
+
+const allowedOrigins = getAllowedOrigins();
+
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || '*',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, Postman, etc.)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.includes('*')) {
+        return callback(null, true);
+      }
+      
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   })
 );
