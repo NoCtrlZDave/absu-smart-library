@@ -39,7 +39,7 @@ const Contact = () => {
     <div className="about-page">
       <div className="about-hero">
         <h1>Contact Us</h1>
-          <p>We would love to hear from you. Reach out to the ABSU Digital Library team.</p>
+        <p>We would love to hear from you. Reach out to the ABSU Smart Library team.</p>
       </div>
 
       <div className="about-content" style={{ marginBottom: '2rem' }}>

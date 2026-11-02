@@ -72,7 +72,7 @@ const ActivateAccount = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-logo">
-            <h1>ABSU Digital Library</h1>
+          <h1>ABSU Smart Library</h1>
           <p>Activate your student account.</p>
         </div>
 

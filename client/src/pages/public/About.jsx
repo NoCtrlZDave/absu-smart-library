@@ -5,7 +5,7 @@ const About = () => {
   return (
     <div className="about-page">
       <div className="about-hero">
-        <h1>About ABSU Digital Library</h1>
+        <h1>About ABSU Smart Library</h1>
         <p>Empowering students with smart access to knowledge since 1980</p>
       </div>
 

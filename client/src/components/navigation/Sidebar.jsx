@@ -225,7 +225,7 @@ function Sidebar({ role = 'librarian', isOpen, onClose, user }) {
           <img src={absuLogo} alt="ABSU logo" className="sidebar__brand-logo" />
           <span className="sidebar__brand-text">
             ABSU
-            <span className="sidebar__brand-sub">Digital Library</span>
+            <span className="sidebar__brand-sub">Smart Library</span>
           </span>
         </Link>
 
