@@ -1031,54 +1031,202 @@
 
 .copies-section {
   margin-bottom: 2rem;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
-.copies-section h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
+.copies-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0.75rem 1rem;
+  border: 0;
+  background: transparent;
   color: var(--text);
-  margin-bottom: 1rem;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: background var(--transition-fast);
+}
+
+.copies-toggle:hover {
+  background: var(--surface-alt);
+}
+
+.copies-section--open .copies-toggle {
+  border-bottom: 1px solid var(--border-light);
+}
+
+.copies-toggle__icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: var(--accent-50);
+  color: var(--primary);
+}
+
+.copies-toggle__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.copies-toggle__title {
   font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.copies-toggle__hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.2;
+}
+
+.copies-toggle__summary {
+  margin-left: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.copies-toggle__chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform var(--transition-fast);
+}
+
+.copies-section--open .copies-toggle__chevron {
+  transform: rotate(180deg);
+}
+
+.copies-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows var(--transition-normal),
+    visibility 0s linear var(--transition-normal);
+}
+
+.copies-section--open .copies-panel {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition: grid-template-rows var(--transition-normal), visibility 0s;
+}
+
+.copies-panel__inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.copies-panel__body {
+  padding: 0.75rem 1rem 1rem;
 }
 
 .copies-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .copy-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.25rem;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.75rem 0.875rem;
   background: var(--surface);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .copy-item:hover {
   border-color: var(--border-dark);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .copy-item-details {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.15rem;
+  min-width: 0;
 }
 
 .copy-item-copyid {
   font-weight: 600;
   color: var(--text);
   font-size: 0.9rem;
+  overflow-wrap: anywhere;
 }
 
 .copy-item-location {
   font-size: 0.8rem;
   color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.copy-item-callno {
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.copy-item-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.copy-status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+}
+
+.copy-status-dot--available {
+  background: var(--success);
+}
+
+.copy-status-dot--reserved {
+  background: var(--info);
+}
+
+.copy-status-dot--borrowed {
+  background: var(--danger);
+}
+
+.copy-status-dot--unavailable {
+  background: var(--text-muted);
+}
+
+.copies-empty {
+  padding: 1.25rem 0.5rem;
+}
+
+.copies-empty .empty-state-icon {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 0;
+}
+
+.copies-empty .empty-state-title {
+  font-size: 0.95rem;
 }
 
 .book-actions {
@@ -1887,10 +2035,31 @@
     padding: 1.25rem;
   }
 
+  .copies-toggle {
+    gap: 0.6rem;
+    padding: 0.65rem 0.85rem;
+  }
+
+  .copies-toggle__icon {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .copies-toggle__hint {
+    display: none;
+  }
+
+  .copies-panel__body {
+    padding: 0.65rem 0.75rem 0.75rem;
+  }
+
   .copy-item {
-    flex-direction: column;
-    align-items: flex-start;
     gap: 0.5rem;
+    padding: 0.7rem;
+  }
+
+  .copy-item-status {
+    gap: 0.25rem;
   }
 }
 

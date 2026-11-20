@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Calendar, Hash, Building, Tag, ArrowLeft, BookOpen, BookMarked, Layers, FileText, Stamp, List, Milestone, LogIn } from 'lucide-react';
-import { Button, Badge, BookCover } from '../../components/common';
+import { MapPin, Calendar, Hash, Building, Tag, ArrowLeft, BookOpen, BookMarked, Layers, FileText, Stamp, List, Milestone, LogIn, ChevronDown } from 'lucide-react';
+import { Button, Badge, BookCover, EmptyState } from '../../components/common';
 import { useToast } from '../../components/common/useToast';
 import { useAuth } from '../../context/useAuth';
 import { useBooks } from '../../context/useBook';
 import { reservationsApi } from '../../services/reservations';
-import { availabilityVariant, reservedAvailableLabel, totalCopiesLabel } from '../../utils/availability';
+import { availabilityVariant, copyNoun, reservedAvailableLabel, totalCopiesLabel } from '../../utils/availability';
 import './Public.css';
 import '../Circulation.css';
 
@@ -14,6 +14,15 @@ const makeLocationString = (book) => {
   const loc = book.location || {};
   const parts = [loc.floor, loc.section, loc.rack, loc.shelf].filter(Boolean);
   return parts.length ? parts.join(', ') : 'Location not set';
+};
+
+const copyStatusMeta = (status) => {
+  const value = (status || 'unknown').toLowerCase();
+  if (value === 'available') return { variant: 'success', tone: 'available', label: 'Available' };
+  if (value === 'verified') return { variant: 'success', tone: 'available', label: 'Verified' };
+  if (value === 'reserved') return { variant: 'info', tone: 'reserved', label: 'Reserved' };
+  if (value === 'borrowed') return { variant: 'danger', tone: 'borrowed', label: 'On loan' };
+  return { variant: 'maintenance', tone: 'unavailable', label: value.charAt(0).toUpperCase() + value.slice(1) };
 };
 
 const BookDetails = () => {
@@ -25,6 +34,9 @@ const BookDetails = () => {
   const [loading, setLoading] = useState(true);
   const [reserving, setReserving] = useState(false);
   const [reservationCreated, setReservationCreated] = useState(false);
+  const [copiesOpen, setCopiesOpen] = useState(() =>
+    typeof window === 'undefined' || !window.matchMedia('(max-width: 768px)').matches
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -79,6 +91,9 @@ const BookDetails = () => {
       </div>
     );
   }
+
+  const copies = book.copies || [];
+  const copyCountLabel = `${copies.length} ${copyNoun(copies.length)}`;
 
   return (
     <div className="book-details">
@@ -246,42 +261,82 @@ const BookDetails = () => {
             </div>
           )}
 
-          <div className="copies-section">
-            <h3>Copies ({book.totalCopies} total)</h3>
-            <div className="copies-list">
-              {(book.copies || []).map(copy => (
-                <div key={copy.id} className="copy-item">
-                  <div>
-                    <strong>{copy.id || copy.code}</strong>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0' }}>
-                      {copy.locationString || makeLocationString(copy.location || book)}
-                    </p>
-                    {copy.callNumber && (
-                      <p style={{ fontSize: '0.8rem', margin: '0.15rem 0 0' }}>
-                        <span style={{ fontWeight: 600 }}>Call No: </span>
-                        <code>{copy.callNumber}</code>
-                      </p>
-                    )}
-                    {copy.physicalLocation && (
-                      <p
-                        className={`physical-location-copy ${copy.physicalLocation.mapped ? '' : 'physical-location-copy--unmapped'}`}
-                        title={copy.physicalLocation.text}
-                      >
-                        <Milestone size={13} />
-                        {copy.physicalLocation.mapped
-                          ? `Pillar ${copy.physicalLocation.pillar} · ${copy.physicalLocation.subject}${copy.physicalLocation.arrow ? ` · ${copy.physicalLocation.arrow} side` : ''}`
-                          : copy.physicalLocation.text}
-                      </p>
-                    )}
-                  </div>
-                  <Badge variant={
-                    copy.status === 'available' ? 'success' :
-                    copy.status === 'borrowed' ? 'danger' : 'warning'
-                  }>
-                    {copy.status.charAt(0).toUpperCase() + copy.status.slice(1)}
-                  </Badge>
+          <div className={`copies-section ${copiesOpen ? 'copies-section--open' : ''}`}>
+            <button
+              type="button"
+              className="copies-toggle"
+              onClick={() => setCopiesOpen((open) => !open)}
+              aria-expanded={copiesOpen}
+              aria-controls="book-copies-panel"
+            >
+              <span className="copies-toggle__icon">
+                <Layers size={18} />
+              </span>
+              <span className="copies-toggle__text">
+                <span className="copies-toggle__title">Copies</span>
+                <span className="copies-toggle__hint">View individual copies</span>
+              </span>
+              <span className="copies-toggle__summary">{copyCountLabel}</span>
+              <ChevronDown className="copies-toggle__chevron" size={20} aria-hidden="true" />
+            </button>
+
+            <div
+              className="copies-panel"
+              id="book-copies-panel"
+              aria-hidden={!copiesOpen}
+            >
+              <div className="copies-panel__inner">
+                <div className="copies-panel__body">
+                  {copies.length === 0 ? (
+                    <EmptyState
+                      icon={BookOpen}
+                      title="No copies yet"
+                      description="This book has no copies in the library catalogue."
+                      className="copies-empty"
+                    />
+                  ) : (
+                    <div className="copies-list">
+                      {copies.map((copy) => {
+                        const status = copyStatusMeta(copy.status);
+                        return (
+                          <div key={copy.id} className="copy-item">
+                            <div className="copy-item-details">
+                              <span className="copy-item-copyid">{copy.id || copy.code}</span>
+                              <span className="copy-item-location">
+                                {copy.locationString || makeLocationString(copy.location || book)}
+                              </span>
+                              {copy.callNumber && (
+                                <span className="copy-item-callno">
+                                  <span>Call No: </span>
+                                  <code>{copy.callNumber}</code>
+                                </span>
+                              )}
+                              {copy.physicalLocation && (
+                                <span
+                                  className={`physical-location-copy ${copy.physicalLocation.mapped ? '' : 'physical-location-copy--unmapped'}`}
+                                  title={copy.physicalLocation.text}
+                                >
+                                  <Milestone size={13} />
+                                  {copy.physicalLocation.mapped
+                                    ? `Pillar ${copy.physicalLocation.pillar} · ${copy.physicalLocation.subject}${copy.physicalLocation.arrow ? ` · ${copy.physicalLocation.arrow} side` : ''}`
+                                    : copy.physicalLocation.text}
+                                </span>
+                              )}
+                            </div>
+                            <span className="copy-item-status">
+                              <span
+                                className={`copy-status-dot copy-status-dot--${status.tone}`}
+                                aria-hidden="true"
+                              />
+                              <Badge variant={status.variant} size="sm">{status.label}</Badge>
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
 
